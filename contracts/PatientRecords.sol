@@ -27,7 +27,7 @@ contract PatientRecords {
             30, 
             "Male", 
             "ABC Insurance", 
-            0xb5B9e0F2AF4705064600397dED6C8D02f45fdbEA
+            0x6764b011bE5772a3928045E8C42bF7048C92b457
         );
         
         addPatient(
@@ -36,7 +36,7 @@ contract PatientRecords {
             28, 
             "Female", 
             "XYZ Insurance", 
-            0xf3d2Cc59DA667dB8cFeb1A2215605727C7ECfFE4
+            0x682497b89d4Cd774D40fECF07dd43a6B7543e1b8
         );
 
         addPatient(
@@ -45,7 +45,7 @@ contract PatientRecords {
             56, 
             "", 
             "XYZ Insurance", 
-            0xf3d2Cc59DA667dB8cFeb1A2215605727C7ECfFE4
+            0x682497b89d4Cd774D40fECF07dd43a6B7543e1b8
         );  
 
         addPatient(
