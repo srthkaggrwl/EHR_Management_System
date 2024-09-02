@@ -427,107 +427,76 @@ window.addEventListener('load', async () => {
     accounts = await web3.eth.getAccounts();
 });
 
-    // document.addEventListener('DOMContentLoaded', function() {
-    //   const patientForm = document.getElementById('patientForm');
-    //   const fetchPatientsButton = document.getElementById('fetchPatients');
-      
-    //   if (patientForm) {
-    //     patientForm.addEventListener('submit', function(event) {
-    //       event.preventDefault();
-    //       // Handle patient form submission
-    //     });
-    //   }
-
-    //   if (fetchPatientsButton) {
-    //     fetchPatientsButton.addEventListener('click', function(event) {
-    //       event.preventDefault();
-    //       // Handle view patient
-    //     });
-    //   }
-
-      
-    // });
-
-
-
-    //const form = document.getElementById('patientForm');
-    // patientForm.addEventListener('submit', async (event) => {
-    //     event.preventDefault();
-        
-    //     const patientID = document.getElementById('patientID').value;
-    //     const name = document.getElementById('name').value;
-    //     const age = document.getElementById('age').value;
-    //     const gender = document.getElementById('gender').value;
-    //     const insuranceCompany = document.getElementById('insuranceCompany').value || "";
-    //     const insuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value || "0x0000000000000000000000000000000000000000";
-
-    //     try {
-    //         // Retrieve the current accounts
-    //         const accounts = await web3.eth.getAccounts();
-    //         const userAccount = accounts[0]; // Get the currently selected account
-
-    //         await PatientRecords.methods.addPatient(patientID, name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: userAccount, gas: 8000000 });
-    //         alert("Patient record added successfully!");
-    //     } catch (error) {
-    //         console.error(error);
-    //         alert("Failed to add patient record.");
-    //     }
-    // });
-
-
 
 document.addEventListener('DOMContentLoaded', function() {
     const patientForm = document.getElementById('patientForm');
-    const fetchPatientsButton = document.getElementById('fetchPatients'); // Button for fetching patients
+    const fetchPatientsButton = document.getElementById('fetchPatients');
+    const patientInfoDiv = document.getElementById('patientInfo');
 
     if (patientForm) {
-        patientForm.addEventListener('submit', function(event) {
+        // This code will only run on the page with the form
+        patientForm.addEventListener('submit', async (event) => {
             event.preventDefault();
-            // Handle patient form submission
+
+            const patientID = document.getElementById('patientID').value;
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const insuranceCompany = document.getElementById('insuranceCompany').value || "";
+            const insuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value || "0x0000000000000000000000000000000000000000";
+
+            try {
+                const accounts = await web3.eth.getAccounts();
+                await PatientRecords.methods.addPatient(patientID, name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: accounts[0], gas: 8000000 });
+                alert("Patient record added successfully!");
+            } catch (error) {
+                console.error(error);
+                alert("Failed to add patient record.");
+            }
         });
     }
 
-    if (fetchPatientsButton) {
-      fetchPatientsButton.addEventListener('click', async function() {
-          try {
-              const accounts = await web3.eth.getAccounts();
-              console.log('Accounts:', accounts);
+    if (fetchPatientsButton && patientInfoDiv) {
+        // This code will only run on the page with the fetch button
+        fetchPatientsButton.addEventListener('click', async function() {
+            try {
+                const accounts = await web3.eth.getAccounts();
+                console.log('Accounts:', accounts);
 
-              // Call the getAllPatients function from the smart contract
-              const result = await PatientRecords.methods.getAllPatients().call();
-              console.log('Result from smart contract:', result);
+                // Call the getAllPatients function from the smart contract
+                const result = await PatientRecords.methods.getAllPatients().call();
+                console.log('Result from smart contract:', result);
 
-              const patientIDsList = result.patientIDsList; // Array of patient IDs
-              const patientList = result.patientList;   // Array of Patient structs
-              const patientInfoDiv = document.getElementById('patientInfo');
+                const patientIDsList = result.patientIDsList; // Array of patient IDs
+                const patientList = result.patientList;   // Array of Patient structs
 
-              // Display patient information
-              patientInfoDiv.innerHTML = ''; // Clear existing content
-              if (patientList.length > 0) {
-                  patientList.forEach(patient => {
-                      const patientDiv = document.createElement('div');
-                      patientDiv.innerHTML = `
-                          <p>Patient ID: ${patient.patientID}</p>
-                          <p>Name: ${patient.name}</p>
-                          <p>Age: ${patient.age}</p>
-                          <p>Gender: ${patient.gender}</p>
-                          <p>Insurance Company: ${patient.insuranceCompany}</p>
-                          <p>Insurance Company Address: ${patient.insuranceCompanyAddress}</p>
-                          <hr>
-                      `;
-                      patientInfoDiv.appendChild(patientDiv);
-                  });
-              } else {
-                  patientInfoDiv.innerHTML = '<p>No patients found.</p>';
-              }
-          } catch (error) {
-              console.error('Error fetching patients:', error.message); // Log error message
-              alert("Failed to fetch patient records. Check console for details.");
-          }
-      });
-    }    
+                // Display patient information
+                patientInfoDiv.innerHTML = ''; // Clear existing content
+                if (patientList.length > 0) {
+                    patientList.forEach(patient => {
+                        const patientDiv = document.createElement('div');
+                        patientDiv.innerHTML = `
+                            <p>Patient ID: ${patient.patientID}</p>
+                            <p>Name: ${patient.name}</p>
+                            <p>Age: ${patient.age}</p>
+                            <p>Gender: ${patient.gender}</p>
+                            <p>Insurance Company: ${patient.insuranceCompany}</p>
+                            <p>Insurance Company Address: ${patient.insuranceCompanyAddress}</p>
+                            <hr>
+                        `;
+                        patientInfoDiv.appendChild(patientDiv);
+                    });
+                } else {
+                    patientInfoDiv.innerHTML = '<p>No patients found.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching patients:', error.message);
+                alert("Failed to fetch patient records. Check console for details.");
+            }
+        });
+    }
 });
 
-    
 
+    
 
