@@ -1,5 +1,5 @@
 // app.js
-const web3 = new Web3(Web3.givenProvider || "HTTP://127.0.0.1:8545");
+const web3 = new Web3(Web3.givenProvider || "HTTP://127.0.0.1:7545");
 
 const abi = [
     {
@@ -398,11 +398,10 @@ const abi = [
       "type": "function",
       "constant": true
     }
-  ];
+  ]
 
-const contractAddress = '0x845d2d41A70802d012ceD147af5f55b14Ba617b9'; // Replace with your contract address
+const contractAddress = '0x2049196A499401607304Fb3891005776c17238B0'; // Replace with your contract address
 
-// Ensure you have web3.js included
 // Ensure you have web3.js included
 window.addEventListener('load', async () => {
     if (window.ethereum) {
@@ -434,13 +433,15 @@ window.addEventListener('load', async () => {
         const insuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value || "0x0000000000000000000000000000000000000000";
 
         try {
-            await PatientRecords.methods.addPatient(patientID, name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: accounts[0] });
+            await PatientRecords.methods.addPatient(patientID, name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: accounts[0], gas: 8000000 });
             alert("Patient record added successfully!");
         } catch (error) {
             console.error(error);
             alert("Failed to add patient record.");
         }
     });
+});
+
 
     // Event listener for viewing patient details
 //    const fetchPatientsButton = document.getElementById('fetchPatients');
@@ -476,4 +477,3 @@ window.addEventListener('load', async () => {
 //             }
 //         });
 //     }
-});
