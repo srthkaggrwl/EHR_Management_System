@@ -1,5 +1,5 @@
 // app.js
-const web3 = new Web3(Web3.givenProvider || "HTTP://127.0.0.1:8545");
+const web3 = new Web3(Web3.givenProvider || "HTTP://127.0.0.1:7545");
 
 const abi = [
     {
@@ -398,9 +398,9 @@ const abi = [
       "type": "function",
       "constant": true
     }
-  ];
+  ]
 
-const contractAddress = '0x845d2d41A70802d012ceD147af5f55b14Ba617b9'; // Replace with your contract address
+const contractAddress = '0x2049196A499401607304Fb3891005776c17238B0'; // Replace with your contract address
 
 // Ensure you have web3.js included
 window.addEventListener('load', async () => {
@@ -433,7 +433,7 @@ window.addEventListener('load', async () => {
         const insuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value || "0x0000000000000000000000000000000000000000";
 
         try {
-            await PatientRecords.methods.addPatient(patientID, name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: accounts[0] });
+            await PatientRecords.methods.addPatient(patientID, name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: accounts[0], gas: 8000000 });
             alert("Patient record added successfully!");
         } catch (error) {
             console.error(error);
@@ -441,3 +441,39 @@ window.addEventListener('load', async () => {
         }
     });
 });
+
+
+    // Event listener for viewing patient details
+//    const fetchPatientsButton = document.getElementById('fetchPatients');
+//     if (fetchPatientsButton) {
+//         fetchPatientsButton.addEventListener('click', async () => {
+//             try {
+//                 const [patientIDs, patientList] = await PatientRecords.methods.getAllPatients().call();
+                
+//                 // Check if patientList is an array and iterate over it
+//                 if (Array.isArray(patientList)) {
+//                     let patientsHTML = '<h2>All Patient Details:</h2>';
+//                     patientList.forEach(patient => {
+//                         patientsHTML += `
+//                             <div>
+//                                 <p><strong>ID:</strong> ${patient.patientID}</p>
+//                                 <p><strong>Name:</strong> ${patient.name}</p>
+//                                 <p><strong>Age:</strong> ${patient.age}</p>
+//                                 <p><strong>Gender:</strong> ${patient.gender}</p>
+//                                 <p><strong>Insurance Company:</strong> ${patient.insuranceCompany}</p>
+//                                 <p><strong>Insurance Company Address:</strong> ${patient.insuranceCompanyAddress}</p>
+//                             </div>
+//                             <hr>
+//                         `;
+//                     });
+//                     document.getElementById('patientInfo').innerHTML = patientsHTML;
+//                 } else {
+//                     console.error("Expected patientList to be an array, but got:", patientList);
+//                     alert("Failed to fetch patient records1.");
+//                 }
+//             } catch (error) {
+//                 console.error("Error fetching patient records:", error);
+//                 alert("Failed to fetch patient records2.");
+//             }
+//         });
+//     }
