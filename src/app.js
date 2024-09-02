@@ -433,6 +433,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const fetchPatientsButton = document.getElementById('fetchPatients');
     const patientInfoDiv = document.getElementById('patientInfo');
 
+
+    // Add new Patient 
+
     if (patientForm) {
         // This code will only run on the page with the form
         patientForm.addEventListener('submit', async (event) => {
@@ -447,7 +450,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 const accounts = await web3.eth.getAccounts();
-                await PatientRecords.methods.addPatient(patientID, name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: accounts[0], gas: 8000000 });
+                const userAccount = accounts[0]; // Get the currently selected account
+
+                await PatientRecords.methods.addPatient(patientID, name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: userAccount, gas: 8000000 });
                 alert("Patient record added successfully!");
             } catch (error) {
                 console.error(error);
@@ -455,6 +460,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Get All patients 
 
     if (fetchPatientsButton && patientInfoDiv) {
         // This code will only run on the page with the fetch button
