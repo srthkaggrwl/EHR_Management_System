@@ -402,6 +402,10 @@ const abi = [
 
 const contractAddress = '0x2049196A499401607304Fb3891005776c17238B0'; // Replace with your contract address
 
+let PatientRecords; // Define in a broader scope
+let accounts; // Define in a broader scope
+
+
 // Ensure you have web3.js included
 window.addEventListener('load', async () => {
     if (window.ethereum) {
@@ -418,62 +422,88 @@ window.addEventListener('load', async () => {
         console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
     }
 
-    const PatientRecords = new web3.eth.Contract(abi, contractAddress);
-    const accounts = await web3.eth.getAccounts();
-
-    const form = document.getElementById('patientForm');
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        
-        const patientID = document.getElementById('patientID').value;
-        const name = document.getElementById('name').value;
-        const age = document.getElementById('age').value;
-        const gender = document.getElementById('gender').value;
-        const insuranceCompany = document.getElementById('insuranceCompany').value || "";
-        const insuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value || "0x0000000000000000000000000000000000000000";
-
-        try {
-            await PatientRecords.methods.addPatient(patientID, name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: accounts[0], gas: 8000000 });
-            alert("Patient record added successfully!");
-        } catch (error) {
-            console.error(error);
-            alert("Failed to add patient record.");
-        }
-    });
+    
+    PatientRecords = new web3.eth.Contract(abi, contractAddress);
+    accounts = await web3.eth.getAccounts();
 });
 
 
-    // Event listener for viewing patient details
-//    const fetchPatientsButton = document.getElementById('fetchPatients');
-//     if (fetchPatientsButton) {
-//         fetchPatientsButton.addEventListener('click', async () => {
-//             try {
-//                 const [patientIDs, patientList] = await PatientRecords.methods.getAllPatients().call();
-                
-//                 // Check if patientList is an array and iterate over it
-//                 if (Array.isArray(patientList)) {
-//                     let patientsHTML = '<h2>All Patient Details:</h2>';
-//                     patientList.forEach(patient => {
-//                         patientsHTML += `
-//                             <div>
-//                                 <p><strong>ID:</strong> ${patient.patientID}</p>
-//                                 <p><strong>Name:</strong> ${patient.name}</p>
-//                                 <p><strong>Age:</strong> ${patient.age}</p>
-//                                 <p><strong>Gender:</strong> ${patient.gender}</p>
-//                                 <p><strong>Insurance Company:</strong> ${patient.insuranceCompany}</p>
-//                                 <p><strong>Insurance Company Address:</strong> ${patient.insuranceCompanyAddress}</p>
-//                             </div>
-//                             <hr>
-//                         `;
-//                     });
-//                     document.getElementById('patientInfo').innerHTML = patientsHTML;
-//                 } else {
-//                     console.error("Expected patientList to be an array, but got:", patientList);
-//                     alert("Failed to fetch patient records1.");
-//                 }
-//             } catch (error) {
-//                 console.error("Error fetching patient records:", error);
-//                 alert("Failed to fetch patient records2.");
-//             }
-//         });
-//     }
+document.addEventListener('DOMContentLoaded', function() {
+    const patientForm = document.getElementById('patientForm');
+    const fetchPatientsButton = document.getElementById('fetchPatients');
+    const patientInfoDiv = document.getElementById('patientInfo');
+
+
+    // Add new Patient 
+
+    if (patientForm) {
+        // This code will only run on the page with the form
+        patientForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const patientID = document.getElementById('patientID').value;
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const insuranceCompany = document.getElementById('insuranceCompany').value || "";
+            const insuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value || "0x0000000000000000000000000000000000000000";
+
+            try {
+                const accounts = await web3.eth.getAccounts();
+                const userAccount = accounts[0]; // Get the currently selected account
+
+                await PatientRecords.methods.addPatient(patientID, name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: userAccount, gas: 8000000 });
+                alert("Patient record added successfully!");
+            } catch (error) {
+                console.error(error);
+                alert("Failed to add patient record.");
+            }
+        });
+    }
+
+    // Get All patients 
+
+    if (fetchPatientsButton && patientInfoDiv) {
+        // This code will only run on the page with the fetch button
+        fetchPatientsButton.addEventListener('click', async function() {
+            try {
+                const accounts = await web3.eth.getAccounts();
+                console.log('Accounts:', accounts);
+
+                // Call the getAllPatients function from the smart contract
+                const result = await PatientRecords.methods.getAllPatients().call();
+                console.log('Result from smart contract:', result);
+
+                const patientIDsList = result.patientIDsList; // Array of patient IDs
+                const patientList = result.patientList;   // Array of Patient structs
+
+                // Display patient information
+                patientInfoDiv.innerHTML = ''; // Clear existing content
+                if (patientList.length > 0) {
+                    patientList.forEach(patient => {
+                        const patientDiv = document.createElement('div');
+                        patientDiv.innerHTML = `
+                            <p>Patient ID: ${patient.patientID}</p>
+                            <p>Name: ${patient.name}</p>
+                            <p>Age: ${patient.age}</p>
+                            <p>Gender: ${patient.gender}</p>
+                            <p>Insurance Company: ${patient.insuranceCompany}</p>
+                            <p>Insurance Company Address: ${patient.insuranceCompanyAddress}</p>
+                            <hr>
+                        `;
+                        patientInfoDiv.appendChild(patientDiv);
+                    });
+                } else {
+                    patientInfoDiv.innerHTML = '<p>No patients found.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching patients:', error.message);
+                alert("Failed to fetch patient records. Check console for details.");
+            }
+        });
+    }
+});
+
+
+    
+

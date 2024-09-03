@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Patient by ID</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>View Patient Details by ID</h1>
+        <form id="patientIdForm">
+            <label for="patientID">Enter Patient ID:</label>
+            <input type="number" id="patientID" name="patientID" required>
+            <button type="submit">Fetch Patient Details</button>
+        </form>
+        <!-- The div that will display patient details -->
+        <div id="patientDetails"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

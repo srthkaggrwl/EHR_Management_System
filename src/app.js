@@ -400,7 +400,7 @@ const abi = [
     }
   ]
 
-const contractAddress = '0x2049196A499401607304Fb3891005776c17238B0'; // Replace with your contract address
+const contractAddress = '0x00A5AF072cAa78051362787A0e0DF90c4d57b5d2'; // Replace with your contract address
 
 let PatientRecords; // Define in a broader scope
 let accounts; // Define in a broader scope
@@ -427,17 +427,34 @@ window.addEventListener('load', async () => {
     accounts = await web3.eth.getAccounts();
 });
 
+async function getUserAccount() {
+    try {
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        if (accounts.length > 0) {
+            return accounts[0]; // Use the first account
+        } else {
+            throw new Error('No MetaMask accounts found.');
+        }
+    } catch (error) {
+        console.error('Error getting user account:', error.message);
+        alert('Failed to get user account. Please ensure MetaMask is connected.');
+        return null;
+    }
+};
+            
 
 document.addEventListener('DOMContentLoaded', function() {
     const patientForm = document.getElementById('patientForm');
+    //view all
     const fetchPatientsButton = document.getElementById('fetchPatients');
-    const patientInfoDiv = document.getElementById('patientInfo');
+    const allPatientInfoDiv = document.getElementById('patientInfo');
+    //view with id
+    const patientIdForm = document.getElementById('patientIdForm');
+    const patientDetailsDiv = document.getElementById('patientDetails'); // Ensure this matches the HTML ID
 
 
     // Add new Patient 
-
     if (patientForm) {
-        // This code will only run on the page with the form
         patientForm.addEventListener('submit', async (event) => {
             event.preventDefault();
 
@@ -461,10 +478,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Get All patients 
-
-    if (fetchPatientsButton && patientInfoDiv) {
-        // This code will only run on the page with the fetch button
+    // Get All Patients
+    if (fetchPatientsButton && allPatientInfoDiv) {
         fetchPatientsButton.addEventListener('click', async function() {
             try {
                 const accounts = await web3.eth.getAccounts();
@@ -474,11 +489,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const result = await PatientRecords.methods.getAllPatients().call();
                 console.log('Result from smart contract:', result);
 
-                const patientIDsList = result.patientIDsList; // Array of patient IDs
-                const patientList = result.patientList;   // Array of Patient structs
+                const patientList = result.patientList; // Array of Patient structs
 
                 // Display patient information
-                patientInfoDiv.innerHTML = ''; // Clear existing content
+                allPatientInfoDiv.innerHTML = ''; // Clear existing content
                 if (patientList.length > 0) {
                     patientList.forEach(patient => {
                         const patientDiv = document.createElement('div');
@@ -491,10 +505,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             <p>Insurance Company Address: ${patient.insuranceCompanyAddress}</p>
                             <hr>
                         `;
-                        patientInfoDiv.appendChild(patientDiv);
+                        allPatientInfoDiv.appendChild(patientDiv);
                     });
                 } else {
-                    patientInfoDiv.innerHTML = '<p>No patients found.</p>';
+                    allPatientInfoDiv.innerHTML = '<p>No patients found.</p>';
                 }
             } catch (error) {
                 console.error('Error fetching patients:', error.message);
@@ -502,8 +516,62 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Get Single Patient
+    if (patientIdForm) {
+        patientIdForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const patientID = document.getElementById('patientID').value; // Ensure this matches the input ID in HTML
+            console.log("Patient ID:", patientID);
+
+            
+
+            try {
+                const accounts = await web3.eth.getAccounts();
+                const userAccount = await getUserAccount(); // Get the currently selected account
+
+                if (!userAccount) {
+                    return; // Exit if there's an error getting the user account
+                }
+
+                console.log('User Account:', userAccount);
+
+                // Call the getPatient function from the smart contract
+                const result = await PatientRecords.methods.getPatient(patientID).call({ from: userAccount });
+                console.log('Result from smart contract:', result);
+
+                // Extract the returned values correctly
+                const id = result[0].toString(); // Convert BigInt to string
+                const name = result[1];
+                const age = result[2].toString(); // Convert BigInt to string
+                const gender = result[3];
+                const insuranceCompany = result[4];
+                const insuranceCompanyAddress = result[5];
+                const status = result[6];
+
+                // Display patient information
+                patientDetailsDiv.innerHTML = ''; // Clear existing content
+
+                if (status === "Access granted") {
+                    patientDetailsDiv.innerHTML = `
+                        <p>Patient ID: ${id}</p>
+                        <p>Name: ${name}</p>
+                        <p>Age: ${age}</p>
+                        <p>Gender: ${gender}</p>
+                        <p>Insurance Company: ${insuranceCompany}</p>
+                        <p>Insurance Company Address: ${insuranceCompanyAddress}</p>
+                        <p>Status: ${status}</p>
+                    `;
+                } else if (status === "Unauthorized access") {
+                    patientDetailsDiv.innerHTML = '<p>You are not authorized to view these patient details.</p>';
+                } else {
+                    patientDetailsDiv.innerHTML = '<p>Patient not found or access denied.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching patient details:', error.message);
+                alert("Failed to fetch patient details. Check console for details.");
+            }
+        });
+    }
 });
-
-
-    
-
