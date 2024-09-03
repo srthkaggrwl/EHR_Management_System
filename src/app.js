@@ -3,11 +3,6 @@ const web3 = new Web3(Web3.givenProvider || "HTTP://127.0.0.1:7545");
 
 const abi = [
     {
-      "inputs": [],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
       "anonymous": false,
       "inputs": [
         {
@@ -89,25 +84,6 @@ const abi = [
       "type": "event"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "insuranceCompanyAddress",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256[]",
-          "name": "patientIDs",
-          "type": "uint256[]"
-        }
-      ],
-      "name": "PatientsByInsuranceCompany",
-      "type": "event"
-    },
-    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -143,6 +119,11 @@ const abi = [
           "type": "uint256"
         },
         {
+          "internalType": "address",
+          "name": "patientAddress",
+          "type": "address"
+        },
+        {
           "internalType": "string",
           "name": "name",
           "type": "string"
@@ -174,11 +155,6 @@ const abi = [
     },
     {
       "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_patientID",
-          "type": "uint256"
-        },
         {
           "internalType": "string",
           "name": "_name",
@@ -213,17 +189,22 @@ const abi = [
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "_patientID",
-          "type": "uint256"
+          "internalType": "address",
+          "name": "_patientAddress",
+          "type": "address"
         }
       ],
-      "name": "getPatient",
+      "name": "getPatientByAddress",
       "outputs": [
         {
           "internalType": "uint256",
           "name": "patientID",
           "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "patientAddress",
+          "type": "address"
         },
         {
           "internalType": "string",
@@ -275,6 +256,11 @@ const abi = [
               "internalType": "uint256",
               "name": "patientID",
               "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "patientAddress",
+              "type": "address"
             },
             {
               "internalType": "string",
@@ -364,6 +350,11 @@ const abi = [
               "type": "uint256"
             },
             {
+              "internalType": "address",
+              "name": "patientAddress",
+              "type": "address"
+            },
+            {
               "internalType": "string",
               "name": "name",
               "type": "string"
@@ -398,13 +389,12 @@ const abi = [
       "type": "function",
       "constant": true
     }
-  ]
+]
 
-const contractAddress = '0x00A5AF072cAa78051362787A0e0DF90c4d57b5d2'; // Replace with your contract address
+const contractAddress = '0xC345DfBCB3CBa70cB9d0669402665F05d9A8F065'; // Replace with your contract address
 
 let PatientRecords; // Define in a broader scope
 let accounts; // Define in a broader scope
-
 
 // Ensure you have web3.js included
 window.addEventListener('load', async () => {
@@ -413,6 +403,7 @@ window.addEventListener('load', async () => {
         try {
             // Use the eth_requestAccounts method to request account access
             await window.ethereum.request({ method: 'eth_requestAccounts' });
+            accounts = await web3.eth.getAccounts();
         } catch (error) {
             console.error("User denied account access");
         }
@@ -422,9 +413,7 @@ window.addEventListener('load', async () => {
         console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
     }
 
-    
     PatientRecords = new web3.eth.Contract(abi, contractAddress);
-    accounts = await web3.eth.getAccounts();
 });
 
 async function getUserAccount() {
@@ -440,25 +429,18 @@ async function getUserAccount() {
         alert('Failed to get user account. Please ensure MetaMask is connected.');
         return null;
     }
-};
-            
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     const patientForm = document.getElementById('patientForm');
-    //view all
     const fetchPatientsButton = document.getElementById('fetchPatients');
-    const allPatientInfoDiv = document.getElementById('patientInfo');
-    //view with id
-    const patientIdForm = document.getElementById('patientIdForm');
-    const patientDetailsDiv = document.getElementById('patientDetails'); // Ensure this matches the HTML ID
+    const patientDetailsDiv = document.getElementById('patientDetails');
 
-
-    // Add new Patient 
+    // Add New Patient
     if (patientForm) {
         patientForm.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            const patientID = document.getElementById('patientID').value;
             const name = document.getElementById('name').value;
             const age = document.getElementById('age').value;
             const gender = document.getElementById('gender').value;
@@ -466,10 +448,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const insuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value || "0x0000000000000000000000000000000000000000";
 
             try {
-                const accounts = await web3.eth.getAccounts();
-                const userAccount = accounts[0]; // Get the currently selected account
+                const userAccount = await getUserAccount(); // Get the currently selected account
 
-                await PatientRecords.methods.addPatient(patientID, name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: userAccount, gas: 8000000 });
+                await PatientRecords.methods.addPatient(name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: userAccount, gas: 8000000 });
                 alert("Patient record added successfully!");
             } catch (error) {
                 console.error(error);
@@ -478,57 +459,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Get All Patients
-    if (fetchPatientsButton && allPatientInfoDiv) {
-        fetchPatientsButton.addEventListener('click', async function() {
-            try {
-                const accounts = await web3.eth.getAccounts();
-                console.log('Accounts:', accounts);
-
-                // Call the getAllPatients function from the smart contract
-                const result = await PatientRecords.methods.getAllPatients().call();
-                console.log('Result from smart contract:', result);
-
-                const patientList = result.patientList; // Array of Patient structs
-
-                // Display patient information
-                allPatientInfoDiv.innerHTML = ''; // Clear existing content
-                if (patientList.length > 0) {
-                    patientList.forEach(patient => {
-                        const patientDiv = document.createElement('div');
-                        patientDiv.innerHTML = `
-                            <p>Patient ID: ${patient.patientID}</p>
-                            <p>Name: ${patient.name}</p>
-                            <p>Age: ${patient.age}</p>
-                            <p>Gender: ${patient.gender}</p>
-                            <p>Insurance Company: ${patient.insuranceCompany}</p>
-                            <p>Insurance Company Address: ${patient.insuranceCompanyAddress}</p>
-                            <hr>
-                        `;
-                        allPatientInfoDiv.appendChild(patientDiv);
-                    });
-                } else {
-                    allPatientInfoDiv.innerHTML = '<p>No patients found.</p>';
-                }
-            } catch (error) {
-                console.error('Error fetching patients:', error.message);
-                alert("Failed to fetch patient records. Check console for details.");
-            }
-        });
-    }
-
-    // Get Single Patient
-    if (patientIdForm) {
-        patientIdForm.addEventListener('submit', async (event) => {
+    
+    // Get Single Patient by Address
+    if (patientAddressForm) {
+        patientAddressForm.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            const patientID = document.getElementById('patientID').value; // Ensure this matches the input ID in HTML
+            const patientID = document.getElementById('patientAddress').value; // Ensure this matches the input ID in HTML
             console.log("Patient ID:", patientID);
 
-            
-
             try {
-                const accounts = await web3.eth.getAccounts();
                 const userAccount = await getUserAccount(); // Get the currently selected account
 
                 if (!userAccount) {
@@ -538,17 +478,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('User Account:', userAccount);
 
                 // Call the getPatient function from the smart contract
-                const result = await PatientRecords.methods.getPatient(patientID).call({ from: userAccount });
+                const result = await PatientRecords.methods.getPatientByAddress(patientID).call({ from: userAccount });
                 console.log('Result from smart contract:', result);
 
                 // Extract the returned values correctly
                 const id = result[0].toString(); // Convert BigInt to string
-                const name = result[1];
-                const age = result[2].toString(); // Convert BigInt to string
-                const gender = result[3];
-                const insuranceCompany = result[4];
-                const insuranceCompanyAddress = result[5];
-                const status = result[6];
+                const patientAddress = result[1];
+                const name = result[2];
+                const age = result[3].toString(); // Convert BigInt to string
+                const gender = result[4];
+                const insuranceCompany = result[5];
+                const insuranceCompanyAddress = result[6];
+                const status = result[7];
 
                 // Display patient information
                 patientDetailsDiv.innerHTML = ''; // Clear existing content
@@ -556,6 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (status === "Access granted") {
                     patientDetailsDiv.innerHTML = `
                         <p>Patient ID: ${id}</p>
+                        <p>Patient Address: ${patientAddress}</p>
                         <p>Name: ${name}</p>
                         <p>Age: ${age}</p>
                         <p>Gender: ${gender}</p>

@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 contract PatientRecords {
     struct Patient {
         uint patientID;
+        address patientAddress;
         string name;
         uint age;
         string gender;
@@ -17,57 +18,27 @@ contract PatientRecords {
     event PatientAdded(uint patientID, string name);
     event InsuranceCompanyUpdated(uint patientID, string oldInsuranceCompany, address oldInsuranceCompanyAddress, string newInsuranceCompany, address newInsuranceCompanyAddress);
     event InsuranceCompanyDeleted(uint patientID, string oldInsuranceCompany, address oldInsuranceCompanyAddress);
-    event PatientsByInsuranceCompany(address insuranceCompanyAddress, uint[] patientIDs);
-
-    constructor() {
-        // Adding dummy records with valid checksummed addresses
-        addPatient(
-            1, 
-            "John Doe", 
-            30, 
-            "Male", 
-            "ABC Insurance", 
-            0x396cfe0B17cC696776f75AD7A37b5990427A8Df8
-        );
-        
-        addPatient(
-            2, 
-            "Alice Smith", 
-            28, 
-            "Female", 
-            "XYZ-2 Insurance", 
-            0x332154DEBAC87021221DF60D0BFba745594A4315
-        );
-
-        addPatient(
-            3, 
-            "David", 
-            56, 
-            "", 
-            "XYZ-2 Insurance", 
-            0x332154DEBAC87021221DF60D0BFba745594A4315
-        );  
-
-        addPatient(
-            4, 
-            "Bob Johnson", 
-            45, 
-            "Male", 
-            "", 
-            0x0000000000000000000000000000000000000000
-        );
-    }
 
     function addPatient(
-        uint _patientID,
         string memory _name,
         uint _age,
         string memory _gender,
         string memory _insuranceCompany,
         address _insuranceCompanyAddress
     ) public {
-        patients[_patientID] = Patient(
-            _patientID,
+        uint newPatientID;
+
+        // Determine the new patientID
+        if (patientIDs.length > 0) {
+            newPatientID = patientIDs[patientIDs.length - 1] + 1;
+        } else {
+            newPatientID = 1;
+        }
+
+        // Add new patient record
+        patients[newPatientID] = Patient(
+            newPatientID,
+            msg.sender, // Automatically store the sender's address as the patient's address
             bytes(_name).length > 0 ? _name : "",
             _age,
             bytes(_gender).length > 0 ? _gender : "",
@@ -75,26 +46,18 @@ contract PatientRecords {
             _insuranceCompanyAddress
         );
 
-        // Check if patientID already exists, if not, add to the array
-        bool exists = false;
-        for (uint i = 0; i < patientIDs.length; i++) {
-            if (patientIDs[i] == _patientID) {
-                exists = true;
-                break;
-            }
-        }
-        if (!exists) {
-            patientIDs.push(_patientID);
-        }
+        // Add patientID to the list of IDs
+        patientIDs.push(newPatientID);
 
-        emit PatientAdded(_patientID, _name);
+        emit PatientAdded(newPatientID, _name);
     }
 
-    function getPatient(uint _patientID)
+    function getPatientByAddress(address _patientAddress)
         public
         view
         returns (
             uint patientID,
+            address patientAddress,
             string memory name,
             uint age,
             string memory gender,
@@ -103,12 +66,35 @@ contract PatientRecords {
             string memory status
         )
     {
-        Patient memory patient = patients[_patientID];
-        
-        // Allow access if no insurance company is associated
-        if (patient.insuranceCompanyAddress == address(0)) {
+        uint length = patientIDs.length;
+
+        // Check if there are no patient records
+        if (length == 0) {
+            return (0, address(0), "", 0, "", "", address(0), "No records found");
+        }
+
+        Patient memory patient;
+        bool found = false;
+
+        // Find the patient by the provided address
+        for (uint i = 0; i < length; i++) {
+            if (patients[patientIDs[i]].patientAddress == _patientAddress) {
+                patient = patients[patientIDs[i]];
+                found = true;
+                break;
+            }
+        }
+
+        // Check if the patient was found
+        if (!found) {
+            return (0, address(0), "", 0, "", "", address(0), "Patient not found");
+        }
+
+        // Grant access if the caller is the patient or the insurance company
+        if (msg.sender == patient.patientAddress || msg.sender == patient.insuranceCompanyAddress) {
             return (
                 patient.patientID,
+                patient.patientAddress,
                 patient.name,
                 patient.age,
                 patient.gender,
@@ -116,22 +102,9 @@ contract PatientRecords {
                 patient.insuranceCompanyAddress,
                 "Access granted"
             );
+        } else {
+            return (0, address(0), "", 0, "", "", address(0), "Unauthorized access");
         }
-
-        // Check if the caller is the insurance company
-        if (msg.sender != patient.insuranceCompanyAddress) {
-            return (0, "", 0, "", "", address(0), "Unauthorized access");
-        }
-
-        return (
-            patient.patientID,
-            patient.name,
-            patient.age,
-            patient.gender,
-            patient.insuranceCompany,
-            patient.insuranceCompanyAddress,
-            "Access granted"
-        );
     }
 
     function getAllPatients()
