@@ -100,8 +100,7 @@ const abi = [
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -150,8 +149,7 @@ const abi = [
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -238,8 +236,7 @@ const abi = [
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [],
@@ -294,8 +291,7 @@ const abi = [
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -386,12 +382,11 @@ const abi = [
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     }
 ]
 
-const contractAddress = '0xC345DfBCB3CBa70cB9d0669402665F05d9A8F065'; // Replace with your contract address
+const contractAddress = '0x78F37270d67A93782869a0eF2f95Ec989f2FB16b'; // Replace with your contract address
 
 let PatientRecords; // Define in a broader scope
 let accounts; // Define in a broader scope
@@ -435,8 +430,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const patientForm = document.getElementById('patientForm');
     const fetchPatientsButton = document.getElementById('fetchPatients');
     const patientDetailsDiv = document.getElementById('patientDetails');
+    const patientAddressForm = document.getElementById('patientAddressForm'); 
 
     // Add New Patient
+
+
     if (patientForm) {
         patientForm.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -450,7 +448,10 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 const userAccount = await getUserAccount(); // Get the currently selected account
 
-                await PatientRecords.methods.addPatient(name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: userAccount, gas: 8000000 });
+                const gasEstimate = await PatientRecords.methods.addPatient(name, age, gender, insuranceCompany, insuranceCompanyAddress).estimateGas({ from: userAccount });
+
+                await PatientRecords.methods.addPatient(name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: userAccount, gas: gasEstimate });
+
                 alert("Patient record added successfully!");
             } catch (error) {
                 console.error(error);
