@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revoke Access to Patient Record</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Revoke Access to Patient Record</h1>
+        <form id="revokeAccessForm">
+            <label for="patientID">Enter Your Patient ID:</label>
+            <input type="text" id="patientID" name="patientID" required>
+            <br><br>
+            <label for="addressPatientID">Enter Address Patient ID to Revoke Access:</label>
+            <input type="text" id="addressPatientID" name="addressPatientID" required>
+            <br><br>
+            <button type="submit">Revoke Access</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

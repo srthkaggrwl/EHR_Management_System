@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Insurance Company</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Update Insurance Company Information</h1>
+        <form id="updateInsuranceForm">
+            <label for="patientID">Enter Patient ID:</label>
+            <input type="text" id="patientID" name="patientID" required><br><br>
+
+            <label for="insuranceCompany">New Insurance Company Name:</label>
+            <input type="text" id="insuranceCompany" name="insuranceCompany" required><br><br>
+
+            <label for="insuranceCompanyAddress">New Insurance Company Address:</label>
+            <input type="text" id="insuranceCompanyAddress" name="insuranceCompanyAddress" required><br><br>
+
+            <button type="submit">Update Insurance Company</button>
+        </form>
+
+        <div id="updateStatus"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
