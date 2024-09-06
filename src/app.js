@@ -516,33 +516,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add New Patient
     if (patientForm) {
-      patientForm.addEventListener('submit', async (event) => {
-          event.preventDefault();
+        patientForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
 
-          const name = document.getElementById('name').value;
-          const age = document.getElementById('age').value;
-          const gender = document.getElementById('gender').value;
-          const insuranceCompany = document.getElementById('insuranceCompany').value || "";
-          const insuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value || "0x0000000000000000000000000000000000000000";
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const insuranceCompany = document.getElementById('insuranceCompany').value || "";
+            const insuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value || "0x0000000000000000000000000000000000000000";
 
-          try {
-              const userAccount = await getUserAccount(); // Get the currently selected account
+            try {
+                const userAccount = await getUserAccount(); // Get the currently selected account
 
-              const gasEstimate = await PatientRecords.methods.addPatient(name, age, gender, insuranceCompany, insuranceCompanyAddress).estimateGas({ from: userAccount });
+                // Estimate gas
+                const gasEstimate = await PatientRecords.methods.addPatient(name, age, gender, insuranceCompany, insuranceCompanyAddress).estimateGas({ from: userAccount });
 
-              await PatientRecords.methods.addPatient(name, age, gender, insuranceCompany, insuranceCompanyAddress).send({ from: userAccount, gas: gasEstimate });
+                // Send the transaction
+                const receipt = await PatientRecords.methods.addPatient(name, age, gender, insuranceCompany, insuranceCompanyAddress)
+                    .send({ from: userAccount, gas: gasEstimate });
 
-              alert("Patient record added successfully!");
+                // Check if the transaction receipt is valid (i.e., transaction was successful)
+                if (receipt && receipt.status) {
+                    // Listen to the `PatientAdded` event from the receipt
+                    const eventReturnValues = receipt.events.PatientAdded.returnValues;
+                    const newPatientID = eventReturnValues.patientID;
 
-              // Clear the form fields
-              patientForm.reset(); 
+                    // Show success message
+                    alert("Patient record added successfully! Your patient ID is: " + newPatientID);
 
-          } catch (error) {
-              console.error(error);
-              alert("Failed to add patient record.");
-          }
-      });
+                    // Clear the form fields
+                    patientForm.reset();
+                } else {
+                    throw new Error("Transaction failed");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Failed to add patient record. Please check the details and try again.");
+            }
+        });
     }
+
 
     
    // Get Single Patient by ID

@@ -344,7 +344,7 @@ contract PatientRecords {
         // Check if the addressPatientID exists
         require(
             addressPatient.patientAddress != address(0),
-            "Invalid patient ID: Patient to grant access, does not exist."
+            "Invalid patient ID: Patient to revoke access, does not exist."
         );
 
         // Find the address in the accessProvided list and remove it
