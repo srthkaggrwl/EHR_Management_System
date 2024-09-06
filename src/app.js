@@ -463,7 +463,7 @@ const abi = [
     }
 ]
 
-const contractAddress = '0xB7e76a0b39174CD85292c6ab2776af5752B0BD61'; // Replace with your contract address
+const contractAddress = '0xD04b6bc21Fd176f9241f5ae6752a10852741b49c'; // Replace with your contract address
 
 let PatientRecords; // Define in a broader scope
 let accounts; // Define in a broader scope
@@ -648,7 +648,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 // Proceed to update the insurance company information
-                const result = await PatientRecords.methods.updateInsuranceCompany(patientID, newInsuranceCompany, newInsuranceCompanyAddress).send({ from: userAccount });
+                const gasEstimate = await PatientRecords.methods.updateInsuranceCompany(patientID, newInsuranceCompany, newInsuranceCompanyAddress).estimateGas({ from: userAccount });
+
+                const result = await PatientRecords.methods.updateInsuranceCompany(patientID, newInsuranceCompany, newInsuranceCompanyAddress).send({ from: userAccount, gas: gasEstimate });
                 console.log('Result from smart contract:', result);
                 alert('Insurance company information updated successfully.');
 
@@ -712,8 +714,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert(`The address ${addressToGrantID} already has access.`);
                     return;
                 }
+                const gasEstimate = await PatientRecords.methods.grantAccess(patientID, addressToGrantID).estimateGas({ from: userAccount });
 
-                await PatientRecords.methods.grantAccess(patientID, addressToGrantID).send({ from: userAccount });
+                await PatientRecords.methods.grantAccess(patientID, addressToGrantID).send({ from: userAccount, gas: gasEstimate });
 
                 alert('Access granted successfully.');
             } catch (error) {
@@ -734,7 +737,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Form element not found.');
     }
 
-
     // Revoke Access
     const revokeAccessForm = document.getElementById('revokeAccessForm');
 
@@ -751,7 +753,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const patientID = patientIDElement.value;
+            console.log(patientID)
             const addressPatientID = addressPatientIDElement.value;
+            console.log(addressPatientID)
 
             try {
                 const userAccount = await getUserAccount();
@@ -761,30 +765,28 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
+                // Fetch the patient data of the current user
                 const patient = await PatientRecords.methods.patients(patientID).call();
+                console.log(patient)
 
                 if (userAccount.toLowerCase() !== patient.patientAddress.toLowerCase()) {
                     alert('You are not authorized to revoke access for this patient.');
                     return;
                 }
 
+                // Fetch the patient data of the address to revoke access from
                 const addressPatient = await PatientRecords.methods.patients(addressPatientID).call();
+                console.log(addressPatient)
+                console.log(patient.accessProvided)
                 
-                if (addressPatient.patientAddress === '0x0000000000000000000000000000000000000000') {
-                    alert(`Invalid patient ID: Patient ID ${addressPatientID} does not exist.`);
-                    return;
-                }
+                // Estimate gas for the revokeAccess function
+                const gasEstimate = await PatientRecords.methods.revokeAccess(patientID, addressPatientID).estimateGas({ from: userAccount });
 
-                const accessProvided = patient.accessProvided || [];
-
-                if (!accessProvided.includes(addressPatient.patientAddress)) {
-                    alert(`The address ${addressPatientID} does not have access.`);
-                    return;
-                }
-
-                await PatientRecords.methods.revokeAccess(patientID, addressPatientID).send({ from: userAccount });
+                // Call revokeAccess on the smart contract
+                await PatientRecords.methods.revokeAccess(patientID, addressPatientID).send({ from: userAccount, gas: gasEstimate });
 
                 alert('Access revoked successfully.');
+                
             } catch (error) {
                 console.error('Error details:', error);
 
@@ -801,6 +803,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     } else {
         console.error('Form element not found.');
-    }    
+    }
 
 });
