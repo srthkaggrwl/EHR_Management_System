@@ -463,7 +463,7 @@ const abi = [
     }
 ]
 
-const contractAddress = '0xD04b6bc21Fd176f9241f5ae6752a10852741b49c'; // Replace with your contract address
+const contractAddress = '0xDD4dAe11a8d4C0Ed7d3DF78caB289AA143b30e0D'; // Replace with your contract address
 
 let PatientRecords; // Define in a broader scope
 let accounts; // Define in a broader scope
@@ -742,7 +742,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (error.message.includes("This address already has access")) {
                     alert('The address already has access.');
                 } else {
-                    alert(`Error: ${error.message}`);
+                    alert(`Invalid Request`);
                 }
             }
         });
@@ -801,7 +801,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Access revoked successfully.');
                 
             } catch (error) {
-                console.error('Error details:', error);
+                console.error('Error', error);
 
                 if (error.message.includes("Unauthorized")) {
                     alert('You are not authorized to revoke access.');
@@ -810,12 +810,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (error.message.includes("Address not found in the access list")) {
                     alert('The address does not have access.');
                 } else {
-                    alert(`Error: ${error.message}`);
+                    alert(`Invalid Request`);
                 }
             }
         });
     } else {
         console.error('Form element not found.');
     }
-
 });
