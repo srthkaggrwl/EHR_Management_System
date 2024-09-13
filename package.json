@@ -2,7 +2,7 @@
   "name": "v.0.1_patientrecords",
   "version": "1.0.0",
   "main": "truffle-config.js",
-  "type": "module",
+  "type": "commonjs",
   "directories": {
     "test": "test"
   },

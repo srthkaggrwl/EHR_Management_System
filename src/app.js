@@ -50,69 +50,7 @@ const abi = [
         {
           "indexed": false,
           "internalType": "string",
-          "name": "oldInsuranceCompany",
-          "type": "string"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "oldInsuranceCompanyAddress",
-          "type": "address"
-        }
-      ],
-      "name": "InsuranceCompanyDeleted",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "patientID",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "oldInsuranceCompany",
-          "type": "string"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "oldInsuranceCompanyAddress",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "newInsuranceCompany",
-          "type": "string"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "newInsuranceCompanyAddress",
-          "type": "address"
-        }
-      ],
-      "name": "InsuranceCompanyUpdated",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "patientID",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "name",
+          "name": "cid",
           "type": "string"
         }
       ],
@@ -155,34 +93,9 @@ const abi = [
           "type": "uint256"
         },
         {
-          "internalType": "address",
-          "name": "patientAddress",
-          "type": "address"
-        },
-        {
           "internalType": "string",
-          "name": "name",
+          "name": "cid",
           "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "age",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "gender",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "insuranceCompany",
-          "type": "string"
-        },
-        {
-          "internalType": "address",
-          "name": "insuranceCompanyAddress",
-          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -193,22 +106,7 @@ const abi = [
       "inputs": [
         {
           "internalType": "string",
-          "name": "_name",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_age",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "_gender",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_insuranceCompany",
+          "name": "_cid",
           "type": "string"
         },
         {
@@ -223,61 +121,6 @@ const abi = [
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_patientID",
-          "type": "uint256"
-        }
-      ],
-      "name": "getPatientByID",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "patientID",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "patientAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "age",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "gender",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "insuranceCompany",
-          "type": "string"
-        },
-        {
-          "internalType": "address",
-          "name": "insuranceCompanyAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "string",
-          "name": "status",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    },
-    {
       "inputs": [],
       "name": "getAllPatients",
       "outputs": [
@@ -287,34 +130,9 @@ const abi = [
           "type": "uint256[]"
         },
         {
-          "internalType": "address[]",
-          "name": "patientAddresses",
-          "type": "address[]"
-        },
-        {
           "internalType": "string[]",
-          "name": "names",
+          "name": "cids",
           "type": "string[]"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "ages",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "string[]",
-          "name": "genders",
-          "type": "string[]"
-        },
-        {
-          "internalType": "string[]",
-          "name": "insuranceCompanies",
-          "type": "string[]"
-        },
-        {
-          "internalType": "address[]",
-          "name": "insuranceCompanyAddresses",
-          "type": "address[]"
         },
         {
           "internalType": "address[][]",
@@ -332,139 +150,36 @@ const abi = [
           "internalType": "uint256",
           "name": "_patientID",
           "type": "uint256"
+        }
+      ],
+      "name": "getPatientByID",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "patientID",
+          "type": "uint256"
         },
         {
           "internalType": "string",
-          "name": "_newInsuranceCompany",
+          "name": "cid",
           "type": "string"
         },
         {
-          "internalType": "address",
-          "name": "_newInsuranceCompanyAddress",
-          "type": "address"
-        }
-      ],
-      "name": "updateInsuranceCompany",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_patientID",
-          "type": "uint256"
-        }
-      ],
-      "name": "deleteInsuranceCompany",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getPatientsByInsuranceCompany",
-      "outputs": [
-        {
-          "internalType": "uint256[]",
-          "name": "patientIDsList",
-          "type": "uint256[]"
-        },
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "patientID",
-              "type": "uint256"
-            },
-            {
-              "internalType": "address",
-              "name": "patientAddress",
-              "type": "address"
-            },
-            {
-              "internalType": "string",
-              "name": "name",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "age",
-              "type": "uint256"
-            },
-            {
-              "internalType": "string",
-              "name": "gender",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "insuranceCompany",
-              "type": "string"
-            },
-            {
-              "internalType": "address",
-              "name": "insuranceCompanyAddress",
-              "type": "address"
-            },
-            {
-              "internalType": "address[]",
-              "name": "accessProvided",
-              "type": "address[]"
-            }
-          ],
-          "internalType": "struct PatientRecords.Patient[]",
-          "name": "patientList",
-          "type": "tuple[]"
+          "internalType": "string",
+          "name": "status",
+          "type": "string"
         }
       ],
       "stateMutability": "view",
       "type": "function",
       "constant": true
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_patientID",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_addressPatientID",
-          "type": "uint256"
-        }
-      ],
-      "name": "grantAccess",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_patientID",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_addressPatientID",
-          "type": "uint256"
-        }
-      ],
-      "name": "revokeAccess",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
     }
 ]
 
 // Ensure Web3 is available
 const web3 = new Web3(Web3.givenProvider || "HTTP://127.0.0.1:7545");
 
-const contractAddress = '0xDD4dAe11a8d4C0Ed7d3DF78caB289AA143b30e0D'; // Replace with your contract address
+const contractAddress = '0x4635D0413F1c0488b64BBEDe676D28202FB242e4'; // Replace with your contract address
 
 let PatientRecords; // Define in a broader scope
 let accounts; // Define in a broader scope
@@ -489,39 +204,71 @@ window.addEventListener('load', async () => {
     PatientRecords = new web3.eth.Contract(abi, contractAddress);
 });
 
-// Ensure this is placed after the IPFS library is included in HTML
 
 
-async function addDataToIPFS(data) {
+async function getUserAccount() {
     try {
-        const ipfs = await ipfs.create();
-
-        // Convert the user data object to a JSON string
-        const userDataString = JSON.stringify(data);
-
-        // Encrypt the data using AES encryption
-        const secretKey = "a3f7bc6d7f8a9d1e7a2a3c4b5d6f8a9c";  // Ensure you manage this key securely in production
-        if (typeof CryptoJS !== 'undefined' && CryptoJS.AES) {
-            const encryptedData = CryptoJS.AES.encrypt(userDataString, secretKey).toString();
-            console.log('Encrypted Data:', encryptedData);
-
-            // Create an IPFS client instance
-            const ipfs = create({ host: 'localhost', port: 5001, protocol: 'http' });
-
-            // Add the encrypted data to IPFS
-            const result = await ipfs.add(encryptedData);
-            console.log('Data added to IPFS. CID:', result.path);
-
-            // Return the CID (result.path) to be stored in the smart contract
-            return result.path;
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        if (accounts.length > 0) {
+            return accounts[0]; // Use the first account
         } else {
-            throw new Error('CryptoJS.AES is not defined.');
+            throw new Error('No MetaMask accounts found.');
         }
     } catch (error) {
-        console.error('Error uploading/fetching data to/from IPFS:', error);
-        throw error;
+        console.error('Error getting user account:', error.message);
+        alert('Failed to get user account. Please ensure MetaMask is connected.');
+        return null;
     }
 }
+
+
+
+// Ensure this is placed after the IPFS library is included in HTML
+async function pushJson(data) {
+  const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`;
+  
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiIzZWFkNzJlZC1jNDI1LTQ0YjUtYjEzZi03MTliZTBkMmQ5NTAiLCJlbWFpbCI6InNhcnRoYWthZ2dhcndhbDEyMEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiMDhiNGE1ZTlkYTA3ZjI1ZDFiY2UiLCJzY29wZWRLZXlTZWNyZXQiOiI1ZGI2MjMyNTIxOGFkMmU0NDlkZjFjMTZlMDk5Y2ZjODQ2ODFiNjVjYWUzMGYyNmE0NjcyMjU5YTdmZWZjOGYxIiwiZXhwIjoxNzU3NzQ2MjE4fQ.0TIJrjd4cFdYPoFV0B4plKfvsEuRDTasWeahCQMHBsQ`
+    },
+    body: JSON.stringify(data)
+  };
+
+  try {
+    const response = await fetch(url, options);
+    const result = await response.json();
+    console.log('Data uploaded to IPFS. CID:', result.IpfsHash);
+    return result.IpfsHash;
+  } catch (error) {
+    console.log('Error uploading data to IPFS:', error);
+    throw error;
+  }
+}
+
+
+async function pull(cid_ipfs) {
+  try {
+    // Step 1: Fetch data from Pinata gateway
+    const gatewayUrl = `https://gateway.pinata.cloud/ipfs/${cid_ipfs}`;
+    const dataResponse = await fetch(gatewayUrl);
+    
+    if (!dataResponse.ok) {
+      throw new Error(`Error fetching data from gateway: ${dataResponse.statusText}`);
+    }
+
+    const data = await dataResponse.json();
+    console.log("Data from IPFS:", data);
+    return data
+
+  } catch (error) {
+    console.log("Error:", error);
+  }
+}
+
+
+
 
 // Ensure the DOM is fully loaded before attaching event listeners
 document.addEventListener('DOMContentLoaded', function() {
@@ -530,123 +277,147 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     if (patientForm) {
-        patientForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
+    patientForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
 
-            const name = document.getElementById('name').value;
-            const age = document.getElementById('age').value;
-            const gender = document.getElementById('gender').value;
-            const insuranceCompany = document.getElementById('insuranceCompany').value || "";
-            const insuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value || "0x0000000000000000000000000000000000000000";
+        const name = document.getElementById('name').value;
+        const age = document.getElementById('age').value;
+        const gender = document.getElementById('gender').value;
+        const insuranceCompany = document.getElementById('insuranceCompany').value || "";
+        const insuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value || "0x0000000000000000000000000000000000000000";
 
-            try {
-                // Prepare the user data object
-                const userData = {
-                    name,
-                    age,
-                    gender,
-                    insuranceCompany,
-                    insuranceCompanyAddress
-                };
+        try {
 
-                // Encrypt the data and store it on IPFS
-                const cid = await addDataToIPFS(userData);
-                console.log('CID returned from IPFS:', cid);
+            // Get the currently selected account
+            const userAccount = await getUserAccount();
 
-                // Uncomment and adjust as needed
-                // const userAccount = await getUserAccount(); // Get the currently selected account
+            // Prepare the user data object
+            const userData = {
+                patientAddress: userAccount,
+                name,
+                age,
+                gender,
+                insuranceCompany,
+                insuranceCompanyAddress
+            };
+            
+            // Encrypt the data and store it on IPFS
+            const cid = await pushJson(userData);
+            console.log('CID returned from IPFS:', cid);
 
-                // // Estimate gas for the transaction
-                // const gasEstimate = await PatientRecords.methods.addPatient(cid).estimateGas({ from: userAccount });
+            // Verify the CID by pulling the data
+            const pulledData = await pull(cid);
+            console.log('Data pulled from IPFS:', pulledData);
 
-                // // Send the transaction with CID instead of raw user data
-                // const receipt = await PatientRecords.methods.addPatient(cid).send({ from: userAccount, gas: gasEstimate });
+          
+            // Estimate gas for the transaction
+            const gasEstimate = await PatientRecords.methods.addPatient(cid, insuranceCompanyAddress).estimateGas({ from: userAccount });
+            const receipt = await PatientRecords.methods.addPatient(cid, insuranceCompanyAddress).send({ from: userAccount, gas: gasEstimate });
 
-                // // Check if the transaction receipt is valid (i.e., transaction was successful)
-                // if (receipt && receipt.status) {
-                //     // Listen to the `PatientAdded` event from the receipt
-                //     const eventReturnValues = receipt.events.PatientAdded.returnValues;
-                //     const newPatientID = eventReturnValues.patientID;
+            // Check if the transaction receipt is valid
+            if (receipt && receipt.status) {
+                // Listen to the `PatientAdded` event from the receipt
+                const eventReturnValues = receipt.events.PatientAdded.returnValues;
+                const newPatientID = eventReturnValues.patientID;
 
-                //     // Show success message
-                //     alert("Patient record added successfully! Your patient ID is: " + newPatientID);
+                // Show success message
+                alert("Patient record added successfully! Your patient ID is: " + newPatientID);
 
-                //     // Clear the form fields
-                //     patientForm.reset();
-                // } else {
-                //     throw new Error("Transaction failed");
-                // }
-            } catch (error) {
-                console.error(error);
-                alert("Failed to add patient record. Please check the details and try again.");
+                // Clear the form fields
+                patientForm.reset();
+            } else {
+                throw new Error("Transaction failed");
             }
-        });
-    }
-});
+        } catch (error) {
+            console.error(error);
+            alert("Failed to add patient record. Please check the details and try again.");
+        }
+    });
+  }
+
+
+
+    // View_Existing_Patient
+    const patientIDForm = document.getElementById('patientIDForm'); 
+    const patientDetailsDiv = document.getElementById('patientDetails'); 
     
-//    // Get Single Patient by ID
-//     if (patientIDForm) {
-//         patientIDForm.addEventListener('submit', async (event) => {
-//             event.preventDefault();
+    //Get Single Patient by ID
+    if (patientIDForm) {
+      patientIDForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
 
-//             const patientID = document.getElementById('patientID').value; 
-//             console.log("Patient ID:", patientID);
+          const patientID = document.getElementById('patientID').value;
+          console.log("Patient ID:", patientID);
 
-//             try {
-//                 const userAccount = await getUserAccount(); // Get the currently selected account
+          try {
+              const userAccount = await getUserAccount(); // Get the currently selected account
 
-//                 if (!userAccount) {
-//                     console.error('No user account found.');
-//                     return; // Exit if there's an error getting the user account
-//                 }
+              if (!userAccount) {
+                  console.error('No user account found.');
+                  return; // Exit if there's an error getting the user account
+              }
 
-//                 console.log('User Account:', userAccount);
+              console.log('User Account:', userAccount);
 
-//                 // Call the getPatientByID function from the smart contract
-//                 const result = await PatientRecords.methods.getPatientByID(patientID).call({ from: userAccount });
-//                 console.log('Result from smart contract:', result);
+              // Call the getPatientByID function from the smart contract
+              const result = await PatientRecords.methods.getPatientByID(patientID).call({ from: userAccount });
+              console.log('Result from smart contract:', result);
 
-//                 // Extract the returned values correctly
-//                 const id = result[0].toString(); 
-//                 const patientAddress = result[1];
-//                 const name = result[2];
-//                 const age = result[3].toString(); 
-//                 const gender = result[4];
-//                 const insuranceCompany = result[5];
-//                 const insuranceCompanyAddress = result[6];
-//                 const status = result[7];
+              // Extract the returned values correctly
+              const id = result[0].toString();
+              const cid = result[1]; // Extract CID from the result
+              const status = result[2];
 
-//                 // Ensure patientDetailsDiv exists
-//                 if (!patientDetailsDiv) {
-//                     console.error('Element with ID "patientDetails" not found.');
-//                     return;
-//                 }
+              // Ensure patientDetailsDiv exists
+              const patientDetailsDiv = document.getElementById('patientDetails');
+              if (!patientDetailsDiv) {
+                  console.error('Element with ID "patientDetails" not found.');
+                  return;
+              }
 
-//                 // Display patient information
-//                 patientDetailsDiv.innerHTML = ''; 
+              // Check access status and fetch data from IPFS
+              if (status === "Access granted") {
+                  // Fetch the patient data from IPFS using the CID
+                  const pulledData = await pull(cid);
+                  console.log('Data pulled from IPFS:', pulledData);
 
-//                 if (status === "Access granted") {
-//                     patientDetailsDiv.innerHTML = `
-//                         <p>Patient ID: ${id}</p>
-//                         <p>Patient Address: ${patientAddress}</p>
-//                         <p>Name: ${name}</p>
-//                         <p>Age: ${age}</p>
-//                         <p>Gender: ${gender}</p>
-//                         <p>Insurance Company: ${insuranceCompany}</p>
-//                         <p>Insurance Company Address: ${insuranceCompanyAddress}</p>
-//                         <p>Status: ${status}</p>
-//                     `;
-//                 } else if (status === "Unauthorized access") {
-//                     patientDetailsDiv.innerHTML = '<p>You are not authorized to view these patient details.</p>';
-//                 } else {
-//                     patientDetailsDiv.innerHTML = '<p>Patient not found or access denied.</p>';
-//                 }
-//             } catch (error) {
-//                 console.error('Error fetching patient details:', error.message);
-//                 alert("Failed to fetch patient details. Check console for details.");
-//             }
-//         });
-//     }
+                  // Display patient information along with data from IPFS
+                  patientDetailsDiv.innerHTML = `
+                      <p>Patient ID: ${id}</p>
+                      <p>Patient Address: ${pulledData.patientAddress}</p>
+                      <p>CID: ${cid}</p>
+                      <p>Name: ${pulledData.name}</p>
+                      <p>Age: ${pulledData.age}</p>
+                      <p>Gender: ${pulledData.gender}</p>
+                      <p>Insurance Company: ${pulledData.insuranceCompany}</p>
+                      <p>Insurance Company Address: ${pulledData.insuranceCompanyAddress}</p>
+                      <p>Status: ${status}</p>
+                  `;
+              } else if (status === "Unauthorized access") {
+                  patientDetailsDiv.innerHTML = '<p>You are not authorized to view these patient details.</p>';
+              } else {
+                  patientDetailsDiv.innerHTML = '<p>Patient not found or access denied.</p>';
+              }
+          } catch (error) {
+              console.error('Error fetching patient details:', error.message);
+              alert("Failed to fetch patient details. Check console for details.");
+          }
+      });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //     // Update Insurance Company 
 //     const updateInsuranceForm = document.getElementById('updateInsuranceForm');
