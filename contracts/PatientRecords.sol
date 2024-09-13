@@ -128,7 +128,45 @@ contract PatientRecords {
             return (0, "", "Unauthorized access");
         }
     }
-}
+
+    function grantAccess(uint _patientID, address _addressToGrant) public {
+        // Get the patient record for the patient granting access
+        Patient storage patient = patients[_patientID];
+
+        // Only the patient can grant access
+        // require(
+        //     msg.sender == patient.patientAddress,
+        //     "Unauthorized: Only the patient can grant access."
+        // );
+        
+        // Check if the address to grant access is valid
+        require(
+            _addressToGrant != address(0),
+            "Invalid address: Cannot grant access to a zero address."
+        );
+
+        // Check if the address is already in the accessProvided list
+        bool alreadyHasAccess = false;
+        for (uint i = 0; i < patient.accessGranted.length; i++){
+            if (patient.accessGranted[i] == _addressToGrant){
+                alreadyHasAccess = true;
+                break;
+            }
+        }
+
+        require(
+            !alreadyHasAccess,
+            "This address already has access."
+        );
+
+        // Add the new address to the accessProvided list
+        patient.accessGranted.push(_addressToGrant);
+
+        // Emit event for granted access
+        emit AccessGranted(_patientID, _addressToGrant);
+    }
+}    
+
 
 //     function updateInsuranceCompany(
 //         uint _patientID,
@@ -246,45 +284,6 @@ contract PatientRecords {
 //         }
 
 //         return (ids, patientsList);
-//     }
-
-//     function grantAccess(uint _patientID, uint _addressPatientID) public {
-//         // Get the patient record for the patient granting access
-//         Patient storage patient = patients[_patientID];
-        
-//         // Get the patient record for the patient receiving access
-//         Patient storage addressPatient = patients[_addressPatientID];
-
-//         // Only the patient can grant access
-//         require(
-//             msg.sender == patient.patientAddress,
-//             "Unauthorized: Only the patient can grant access."
-//         );
-        
-//         // Check if the addressPatientID exists
-//         require(
-//             addressPatient.patientAddress != address(0),
-//             "Invalid patient ID: Patient to grant access, does not exist."
-//         );
-
-//         // Check if the address is already in the accessProvided list
-//         bool alreadyHasAccess = false;
-//         for (uint i = 0; i < patient.accessProvided.length; i++) {
-//             if (patient.accessProvided[i] == addressPatient.patientAddress) {
-//                 alreadyHasAccess = true;
-//                 break;
-//             }
-//         }
-
-//         require(
-//             !alreadyHasAccess,
-//             "This address already has access."
-//         );
-
-//         // Add the new address to the accessProvided list
-//         patient.accessProvided.push(addressPatient.patientAddress);
-
-//         emit AccessGranted(_patientID, addressPatient.patientAddress);
 //     }
 
 

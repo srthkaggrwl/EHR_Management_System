@@ -173,13 +173,31 @@ const abi = [
       "stateMutability": "view",
       "type": "function",
       "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_patientID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_addressToGrant",
+          "type": "address"
+        }
+      ],
+      "name": "grantAccess",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
 ]
 
 // Ensure Web3 is available
 const web3 = new Web3(Web3.givenProvider || "HTTP://127.0.0.1:7545");
 
-const contractAddress = '0x4635D0413F1c0488b64BBEDe676D28202FB242e4'; // Replace with your contract address
+const contractAddress = '0x7F7afdaAC6Bf4F7065fF931EcCB5907d08c70869'; // Replace with your contract address
 
 let PatientRecords; // Define in a broader scope
 let accounts; // Define in a broader scope
@@ -404,19 +422,118 @@ document.addEventListener('DOMContentLoaded', function() {
           }
       });
   }
-});
 
 
 
+  // Grant Access
+  const grantAccessForm = document.getElementById('grantAccessForm');
+// Check if the form element is available
+  if (grantAccessForm) {
+      grantAccessForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
 
+          const patientIDElement = document.getElementById('patientID');
+          const addressToGrantIDElement = document.getElementById('addressToGrantID');
 
+          if (!patientIDElement || !addressToGrantIDElement) {
+              alert('Error: Required form elements not found.');
+              return;
+          }
 
+          const patientID = patientIDElement.value;
+          const addressToGrantID = addressToGrantIDElement.value;
+          console.log(patientID);
+          console.log(addressToGrantID);
 
+          try {
+              const userAccount = await getUserAccount();
 
+              if (!userAccount) {
+                  alert('Error: No user account found.');
+                  return;
+              }
 
+              // Fetch patient data from the contract (this gives us CID stored on-chain)
+              const patient = await PatientRecords.methods.patients(patientID).call();
 
+              // Pull the patient's data from IPFS using CID
+              const cid = patient.cid;  // Retrieve CID from the patient data in the contract
+              console.log('CID from contract:', cid);
 
+              // Fetch the patient data stored on IPFS using the CID
+              const patientData = await pull(cid);  // `pull` is a function to retrieve data from IPFS
+              console.log('Patient data from IPFS:', patientData);
 
+              // Now, compare the `patientAddress` from IPFS with the user account
+              const patientAddressFromIPFS = patientData.patientAddress;
+              console.log('Patient Address from IPFS:', patientAddressFromIPFS);
+
+              if (userAccount.toLowerCase() !== patientAddressFromIPFS.toLowerCase()) {
+                  alert('You are not authorized to grant access for this patient.');
+                  return;
+              }
+
+              // Fetch the data of the patient who is being granted access (optional check)
+              const addressPatient = await PatientRecords.methods.patients(addressToGrantID).call();
+
+              // Validate if the patient to grant access exists on the chain
+              if (addressPatient.patientAddress === '0x0000000000000000000000000000000000000000') {
+                  alert(`Invalid patient ID: Patient ID ${addressToGrantID} does not exist.`);
+                  return;
+              }
+
+              // Check if the address is already in the accessProvided list
+              const accessProvided = patientData.accessProvided || [];
+
+              if (accessProvided.includes(addressPatient.patientAddress)) {
+                  alert(`The address ${addressToGrantID} already has access.`);
+                  return;
+              }
+
+              // Estimate gas for the transaction
+              const gasEstimate = await PatientRecords.methods.grantAccess(patientID, addressToGrantID).estimateGas({ from: userAccount });
+
+              // Grant access by calling the smart contract
+              const receipt = await PatientRecords.methods.grantAccess(patientID, addressToGrantID).send({ from: userAccount, gas: gasEstimate });
+
+              console.log('Transaction receipt:', receipt);
+
+              if (receipt.status) {
+                  // Update the accessProvided list locally
+                  accessProvided.push(addressPatient.patientAddress);
+
+                  // Update the patient data on IPFS with the new accessProvided list
+                  patientData.accessProvided = accessProvided;
+                  const newCid = await pushJson(patientData);  // Push updated data to IPFS and get new CID
+                  console.log('New CID after updating IPFS:', newCid);
+
+                  // Call the smart contract to update the CID with the new one
+                  // const updateReceipt = await PatientRecords.methods.updatePatientCID(patientID, newCid).send({ from: userAccount, gas: gasEstimate });
+                  // console.log('Updated CID on blockchain:', updateReceipt);
+
+                  alert('Access granted and updated successfully.');
+              } else {
+                  throw new Error("Transaction failed");
+              }
+          } catch (error) {
+              console.error('Error details:', error);
+
+              if (error.message.includes("Unauthorized")) {
+                  alert('You are not authorized to grant access.');
+              } else if (error.message.includes("Invalid patient ID")) {
+                  alert(error.message);
+              } else if (error.message.includes("This address already has access")) {
+                  alert('The address already has access.');
+              } else {
+                  alert(`Invalid Request`);
+              }
+          }
+      });
+  } else {
+      console.error('Form element not found.');
+  }
+
+}); 
 
 
 //     // Update Insurance Company 
@@ -473,79 +590,8 @@ document.addEventListener('DOMContentLoaded', function() {
 //         });
 //     }
 
-//     // Grant Access
-//     const grantAccessForm = document.getElementById('grantAccessForm');
 
-//     // Check if the form element is available
 
-//     if (grantAccessForm) {
-//         grantAccessForm.addEventListener('submit', async (event) => {
-//             event.preventDefault();
-
-//             const patientIDElement = document.getElementById('patientID');
-//             const addressToGrantIDElement = document.getElementById('addressToGrantID');
-
-//             if (!patientIDElement || !addressToGrantIDElement) {
-//                 alert('Error: Required form elements not found.');
-//                 return;
-//             }
-
-//             const patientID = patientIDElement.value;
-//             const addressToGrantID = addressToGrantIDElement.value;
-
-//             try {
-//                 const userAccount = await getUserAccount();
-
-//                 if (!userAccount) {
-//                     alert('Error: No user account found.');
-//                     return;
-//                 }
-
-//                 const patient = await PatientRecords.methods.patients(patientID).call();
-
-//                 console.log(userAccount)
-//                 console.log(patient.patientAddress)
-
-//                 if (userAccount.toLowerCase() !== patient.patientAddress.toLowerCase()) {
-//                     alert('You are not authorized to grant access for this patient.');
-//                     return;
-//                 }
-
-//                 const addressPatient = await PatientRecords.methods.patients(addressToGrantID).call();
-                
-//                 if (addressPatient.patientAddress === '0x0000000000000000000000000000000000000000') {
-//                     alert(`Invalid patient ID: Patient ID ${addressToGrantID} does not exist.`);
-//                     return;
-//                 }
-
-//                 const accessProvided = patient.accessProvided || [];
-
-//                 if (accessProvided.includes(addressPatient.patientAddress)) {
-//                     alert(`The address ${addressToGrantID} already has access.`);
-//                     return;
-//                 }
-//                 const gasEstimate = await PatientRecords.methods.grantAccess(patientID, addressToGrantID).estimateGas({ from: userAccount });
-
-//                 await PatientRecords.methods.grantAccess(patientID, addressToGrantID).send({ from: userAccount, gas: gasEstimate });
-
-//                 alert('Access granted successfully.');
-//             } catch (error) {
-//                 console.error('Error details:', error);
-
-//                 if (error.message.includes("Unauthorized")) {
-//                     alert('You are not authorized to grant access.');
-//                 } else if (error.message.includes("Invalid patient ID")) {
-//                     alert(error.message);
-//                 } else if (error.message.includes("This address already has access")) {
-//                     alert('The address already has access.');
-//                 } else {
-//                     alert(`Invalid Request`);
-//                 }
-//             }
-//         });
-//     } else {
-//         console.error('Form element not found.');
-//     }
 
 //     // Revoke Access
 //     const revokeAccessForm = document.getElementById('revokeAccessForm');
