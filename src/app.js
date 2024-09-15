@@ -42,6 +42,37 @@ const abi = [
       "anonymous": false,
       "inputs": [
         {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "patientID",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "oldInsuranceCompanyAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newInsuranceCompanyAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "cid",
+          "type": "string"
+        }
+      ],
+      "name": "InsuranceCompanyUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": false,
           "internalType": "uint256",
           "name": "patientID",
@@ -209,6 +240,34 @@ const abi = [
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_patientID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_newInsuranceCompanyAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_oldInsuranceCompanyAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_cid",
+          "type": "string"
+        }
+      ],
+      "name": "updateInsuranceCompany",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
 ]
 
@@ -217,7 +276,7 @@ const web3 = new Web3(Web3.givenProvider || "HTTP://127.0.0.1:7545");
 //const web3 = new Web3(Web3.givenProvider || "HTTP://139.59.86.36:8545");
 
 
-const contractAddress = '0x7797B2c84D5F447e48E6e6cFf30E31b6bF38Fbd9'; // Replace with your contract address
+const contractAddress = '0xA0e8A8c85E6f3F7461dc16c39266bE8e13081Fa8'; // Replace with your contract address
 
 let PatientRecords; // Define in a broader scope
 let accounts; // Define in a broader scope
@@ -646,62 +705,81 @@ document.addEventListener('DOMContentLoaded', function() {
       console.error('Form element not found.');
   }
 
+
+
+  // Update Insurance Company
+  const updateInsuranceForm = document.getElementById('updateInsuranceForm');
+  if (updateInsuranceForm) {
+      updateInsuranceForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+
+          const patientID = document.getElementById('patientID').value;
+          const newInsuranceCompany = document.getElementById('insuranceCompany').value;
+          const newInsuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value;
+
+          try {
+              const userAccount = await getUserAccount();
+
+              if (!userAccount) {
+                  console.error('No user account found.');
+                  return;
+              }
+
+              console.log('User Account:', userAccount);
+              // Fetch the patient data from the contract
+              const patient = await PatientRecords.methods.patients(patientID).call();
+              const cid = patient.cid;  // Retrieve CID from the patient data
+              console.log('CID from contract:', cid);
+
+              // Pull the patient data from IPFS using the CID
+              const patientData = await pull(cid);  // `pull` is a function to retrieve data from IPFS
+              console.log('Patient data from IPFS:', patientData);
+
+              if (!patientData) {
+                  throw new Error('Failed to fetch patient data from IPFS.');
+              }
+
+              const oldInsuranceCompanyAddress = patientData.insuranceCompanyAddress;
+
+              // Update patient data and push new CID to IPFS
+              patientData.insuranceCompany = newInsuranceCompany;
+              patientData.insuranceCompanyAddress = newInsuranceCompanyAddress;
+
+              const updatedCid = await pushJson(patientData);
+
+              if (userAccount.toLowerCase() !== patientData.patientAddress.toLowerCase()) {
+                  alert('You are not authorized to update this insurance company information.');
+                  return;
+              }
+
+              const gasEstimate = await PatientRecords.methods.updateInsuranceCompany(
+                  patientID,
+                  oldInsuranceCompanyAddress,
+                  newInsuranceCompanyAddress,
+                  updatedCid
+              ).estimateGas({ from: userAccount });
+
+              const result = await PatientRecords.methods.updateInsuranceCompany(
+                  patientID,
+                  oldInsuranceCompanyAddress,
+                  newInsuranceCompanyAddress,
+                  updatedCid
+              ).send({ from: userAccount, gas: gasEstimate });
+
+              console.log('Result from smart contract:', result);
+              alert('Insurance company information updated successfully.');
+
+              updateInsuranceForm.reset();
+
+          } catch (error) {
+              console.error('Error details:', error);
+              alert('Failed to update insurance company information. Check console for details.');
+          }
+      });
+  } else {
+      console.error('Update Insurance Form element not found.');
+  }
+
+
+
 });
-
-
-//     // Update Insurance Company 
-//     const updateInsuranceForm = document.getElementById('updateInsuranceForm');
-
-//     // Function to update the insurance company details
-//     // Function to update the insurance company details
-//     if (updateInsuranceForm) {
-//         updateInsuranceForm.addEventListener('submit', async (event) => {
-//             event.preventDefault();
-
-//             const patientID = document.getElementById('patientID').value;
-//             const newInsuranceCompany = document.getElementById('insuranceCompany').value;
-//             const newInsuranceCompanyAddress = document.getElementById('insuranceCompanyAddress').value;
-
-//             try {
-//                 const userAccount = await getUserAccount(); // Get the currently selected account
-
-//                 if (!userAccount) {
-//                     console.error('No user account found.');
-//                     return; // Exit if there's an error getting the user account
-//                 }
-
-//                 console.log('User Account:', userAccount);
-
-//                 // Check if the user has access to update this patient's record
-//                 const patientInfo = await PatientRecords.methods.getPatientByID(patientID).call({ from: userAccount });
-//                 const patientAddress = patientInfo[1]; // Assuming patientAddress is the 2nd element
-//                 const status = patientInfo[7]; // Assuming status is the 8th element
-
-//                 if (userAccount.toLowerCase() !== patientAddress.toLowerCase()) {
-//                     alert('You are not authorized to update this insurance company information.');
-//                     return; // Exit if the user is not the patient
-//                 }
-
-//                 if (status !== "Access granted") {
-//                     alert('You do not have access to update this information.');
-//                     return; // Exit if access is not granted
-//                 }
-
-//                 // Proceed to update the insurance company information
-//                 const gasEstimate = await PatientRecords.methods.updateInsuranceCompany(patientID, newInsuranceCompany, newInsuranceCompanyAddress).estimateGas({ from: userAccount });
-
-//                 const result = await PatientRecords.methods.updateInsuranceCompany(patientID, newInsuranceCompany, newInsuranceCompanyAddress).send({ from: userAccount, gas: gasEstimate });
-//                 console.log('Result from smart contract:', result);
-//                 alert('Insurance company information updated successfully.');
-
-//                 updateInsuranceForm.reset()
-
-//             } catch (error) {
-//                 console.error('Error details:', error);
-//                 alert('Failed to update insurance company information. Check console for details.');
-//             }
-//         });
-//     }
-
-
-

@@ -14,6 +14,13 @@ contract PatientRecords {
     event PatientAdded(uint patientID, string cid);
     event AccessGranted(uint indexed patientID, address indexed newAddress);
     event AccessRevoked(uint patientID, address revokedAddress);
+    event InsuranceCompanyUpdated(
+        uint indexed patientID,
+        address indexed oldInsuranceCompanyAddress,
+        address indexed newInsuranceCompanyAddress,
+        string cid // Updated CID
+    );
+
 
 
     // Add patient data with CID and manage access rights
@@ -196,82 +203,74 @@ contract PatientRecords {
         emit AccessRevoked(_patientID, _addressToRevoke);
     }
 
+    function updateInsuranceCompany(
+        uint _patientID,
+        address _newInsuranceCompanyAddress,
+        address _oldInsuranceCompanyAddress,
+        string memory _cid // Pass CID as a parameter
+    ) public {
+        Patient storage patient = patients[_patientID];
+
+        // Allow update only if the caller is the patient
+        // require(
+        //     msg.sender == patient.patientAddress,
+        //     "Unauthorized: Only the patient can update this record."
+        // );
+
+        // Modify the accessGranted array to update the insurance company's access
+        bool replaced = false;
+        for (uint i = 0; i < patient.accessGranted.length; i++) {
+            if (patient.accessGranted[i] == _oldInsuranceCompanyAddress) {
+                patient.accessGranted[i] = _newInsuranceCompanyAddress; // Replace with new company address
+                replaced = true;
+                break;
+            }
+        }
+
+        // If the old insurance company address was not found, add the new address
+        if (!replaced) {
+            patient.accessGranted.push(_newInsuranceCompanyAddress);
+        }
+
+        // Emit event to notify that the insurance company access details were updated
+        emit InsuranceCompanyUpdated(
+            _patientID,
+            _oldInsuranceCompanyAddress,
+            _newInsuranceCompanyAddress,
+            _cid // Emit the updated CID for reference
+        );
+    }
 }
+    // function deleteInsuranceCompany(uint _patientID) public {
+    //     Patient storage patient = patients[_patientID];
 
-//     function updateInsuranceCompany(
-//         uint _patientID,
-//         string memory _newInsuranceCompany,
-//         address _newInsuranceCompanyAddress
-//     ) public {
-//         Patient storage patient = patients[_patientID];
+    //     // Allow deletion only if the caller is the patient
+    //     require(
+    //         msg.sender == patient.patientAddress,
+    //         "Unauthorized: Only the patient can delete the insurance company."
+    //     );
 
-//         // Allow update only if the caller is the patient
-//         require(
-//             msg.sender == patient.patientAddress,
-//             "Unauthorized: Only the patient can update this record."
-//         );
+    //     string memory oldInsuranceCompany = patient.insuranceCompany;
+    //     address oldInsuranceCompanyAddress = patient.insuranceCompanyAddress;
 
-//         string memory oldInsuranceCompany = patient.insuranceCompany;
-//         address oldInsuranceCompanyAddress = patient.insuranceCompanyAddress;
+    //     // Reset the insurance company details
+    //     patient.insuranceCompany = "";
+    //     patient.insuranceCompanyAddress = address(0);
 
-//         // Update the insurance company details
-//         patient.insuranceCompany = _newInsuranceCompany;
-//         patient.insuranceCompanyAddress = _newInsuranceCompanyAddress;
+    //     // Revoke access by removing the old insurance company address from the accessGranted array
+    //     for (uint i = 0; i < patient.accessGranted.length; i++) {
+    //         if (patient.accessGranted[i] == oldInsuranceCompanyAddress) {
+    //             // Remove the address by shifting the elements in the array
+    //             for (uint j = i; j < patient.accessGranted.length - 1; j++) {
+    //                 patient.accessGranted[j] = patient.accessGranted[j + 1];
+    //             }
+    //             patient.accessGranted.pop(); // Reduce the array length
+    //             break; // Exit the loop once the insurance company address is found and removed
+    //         }
+    //     }
 
-//         // Replace old insurance company address in the accessGranted array with the new address
-//         bool replaced = false;
-//         for (uint i = 0; i < patient.accessGranted.length; i++) {
-//             if (patient.accessGranted[i] == oldInsuranceCompanyAddress) {
-//                 patient.accessGranted[i] = _newInsuranceCompanyAddress;
-//                 replaced = true;
-//                 break;
-//             }
-//         }
-
-//         // If the old insurance company address was not found in the array, add the new address
-//         if (!replaced) {
-//             patient.accessGranted.push(_newInsuranceCompanyAddress);
-//         }
-
-//         emit InsuranceCompanyUpdated(
-//             _patientID,
-//             oldInsuranceCompany,
-//             oldInsuranceCompanyAddress,
-//             _newInsuranceCompany,
-//             _newInsuranceCompanyAddress
-//         );
-//     }
-
-//     function deleteInsuranceCompany(uint _patientID) public {
-//         Patient storage patient = patients[_patientID];
-
-//         // Allow deletion only if the caller is the patient
-//         require(
-//             msg.sender == patient.patientAddress,
-//             "Unauthorized: Only the patient can delete the insurance company."
-//         );
-
-//         string memory oldInsuranceCompany = patient.insuranceCompany;
-//         address oldInsuranceCompanyAddress = patient.insuranceCompanyAddress;
-
-//         // Reset the insurance company details
-//         patient.insuranceCompany = "";
-//         patient.insuranceCompanyAddress = address(0);
-
-//         // Revoke access by removing the old insurance company address from the accessGranted array
-//         for (uint i = 0; i < patient.accessGranted.length; i++) {
-//             if (patient.accessGranted[i] == oldInsuranceCompanyAddress) {
-//                 // Remove the address by shifting the elements in the array
-//                 for (uint j = i; j < patient.accessGranted.length - 1; j++) {
-//                     patient.accessGranted[j] = patient.accessGranted[j + 1];
-//                 }
-//                 patient.accessGranted.pop(); // Reduce the array length
-//                 break; // Exit the loop once the insurance company address is found and removed
-//             }
-//         }
-
-//         emit InsuranceCompanyDeleted(_patientID, oldInsuranceCompany, oldInsuranceCompanyAddress);
-//     }
+    //     emit InsuranceCompanyDeleted(_patientID, oldInsuranceCompany, oldInsuranceCompanyAddress);
+    // }
 
 //     function getPatientsByInsuranceCompany()
 //         public
