@@ -48,14 +48,14 @@ contract PatientRecords {
         returns (
             uint[] memory patientIDsList,
             string[] memory cids,
-            address[][] memory accessProvidedLists
+            address[][] memory accessGrantedLists
         )
     {   
         uint length = patientIDs.length;
 
         // Create memory arrays for each patient property
         string[] memory _cids = new string[](length);
-        address[][] memory _accessProvidedLists = new address[][](length);  // Array of arrays
+        address[][] memory _accessGrantedLists = new address[][](length);  // Array of arrays
 
         for (uint i = 0; i < length; i++) {
             uint patientID = patientIDs[i];
@@ -63,14 +63,14 @@ contract PatientRecords {
 
             // Populate memory arrays with patient data
             _cids[i] = patient.cid;
-            _accessProvidedLists[i] = patient.accessGranted;  // Store dynamic access list
+            _accessGrantedLists[i] = patient.accessGranted;  // Store dynamic access list
         }
         
         // Return patient IDs, CIDs, and accessGranted lists
         return (
             patientIDs,
             _cids,
-            _accessProvidedLists
+            _accessGrantedLists
         );
     }
 
@@ -145,7 +145,7 @@ contract PatientRecords {
             "Invalid address: Cannot grant access to a zero address."
         );
 
-        // Check if the address is already in the accessProvided list
+        // Check if the address is already in the accessGranted list
         bool alreadyHasAccess = false;
         for (uint i = 0; i < patient.accessGranted.length; i++){
             if (patient.accessGranted[i] == _addressToGrant){
@@ -159,14 +159,44 @@ contract PatientRecords {
             "This address already has access."
         );
 
-        // Add the new address to the accessProvided list
+        // Add the new address to the accessGranted list
         patient.accessGranted.push(_addressToGrant);
 
         // Emit event for granted access
         emit AccessGranted(_patientID, _addressToGrant);
     }
-}    
+  
 
+    function revokeAccess(uint _patientID, address _addressToRevoke) public {
+        // Get the patient record for the patient revoking access
+        Patient storage patient = patients[_patientID];
+
+        // Only the patient can revoke access
+        // require(
+        //     msg.sender == patient.patientAddress,
+        //     "Unauthorized: Only the patient can revoke access."
+        // );
+
+        // Check if the address to revoke exists in the accessGranted list
+        bool addressFound = false;
+        for (uint i = 0; i < patient.accessGranted.length; i++) {
+            if (patient.accessGranted[i] == _addressToRevoke) {
+                // Remove the address by shifting the last element to the current position and reducing the array size
+                patient.accessGranted[i] = patient.accessGranted[patient.accessGranted.length - 1];
+                patient.accessGranted.pop();
+                addressFound = true;
+                break;
+            }
+        }
+
+        // If the address was not found in the list
+        require(addressFound, "Address not found in the access list.");
+
+        // Emit an event for revoking access
+        emit AccessRevoked(_patientID, _addressToRevoke);
+    }
+
+}
 
 //     function updateInsuranceCompany(
 //         uint _patientID,
@@ -188,11 +218,11 @@ contract PatientRecords {
 //         patient.insuranceCompany = _newInsuranceCompany;
 //         patient.insuranceCompanyAddress = _newInsuranceCompanyAddress;
 
-//         // Replace old insurance company address in the accessProvided array with the new address
+//         // Replace old insurance company address in the accessGranted array with the new address
 //         bool replaced = false;
-//         for (uint i = 0; i < patient.accessProvided.length; i++) {
-//             if (patient.accessProvided[i] == oldInsuranceCompanyAddress) {
-//                 patient.accessProvided[i] = _newInsuranceCompanyAddress;
+//         for (uint i = 0; i < patient.accessGranted.length; i++) {
+//             if (patient.accessGranted[i] == oldInsuranceCompanyAddress) {
+//                 patient.accessGranted[i] = _newInsuranceCompanyAddress;
 //                 replaced = true;
 //                 break;
 //             }
@@ -200,7 +230,7 @@ contract PatientRecords {
 
 //         // If the old insurance company address was not found in the array, add the new address
 //         if (!replaced) {
-//             patient.accessProvided.push(_newInsuranceCompanyAddress);
+//             patient.accessGranted.push(_newInsuranceCompanyAddress);
 //         }
 
 //         emit InsuranceCompanyUpdated(
@@ -228,14 +258,14 @@ contract PatientRecords {
 //         patient.insuranceCompany = "";
 //         patient.insuranceCompanyAddress = address(0);
 
-//         // Revoke access by removing the old insurance company address from the accessProvided array
-//         for (uint i = 0; i < patient.accessProvided.length; i++) {
-//             if (patient.accessProvided[i] == oldInsuranceCompanyAddress) {
+//         // Revoke access by removing the old insurance company address from the accessGranted array
+//         for (uint i = 0; i < patient.accessGranted.length; i++) {
+//             if (patient.accessGranted[i] == oldInsuranceCompanyAddress) {
 //                 // Remove the address by shifting the elements in the array
-//                 for (uint j = i; j < patient.accessProvided.length - 1; j++) {
-//                     patient.accessProvided[j] = patient.accessProvided[j + 1];
+//                 for (uint j = i; j < patient.accessGranted.length - 1; j++) {
+//                     patient.accessGranted[j] = patient.accessGranted[j + 1];
 //                 }
-//                 patient.accessProvided.pop(); // Reduce the array length
+//                 patient.accessGranted.pop(); // Reduce the array length
 //                 break; // Exit the loop once the insurance company address is found and removed
 //             }
 //         }
@@ -258,8 +288,8 @@ contract PatientRecords {
 //         // First, count how many patients have granted access to the caller (insurance company)
 //         for (uint i = 0; i < length; i++) {
 //             Patient memory patient = patients[patientIDs[i]];
-//             for (uint j = 0; j < patient.accessProvided.length; j++) {
-//                 if (patient.accessProvided[j] == insuranceCompanyAddress) {
+//             for (uint j = 0; j < patient.accessGranted.length; j++) {
+//                 if (patient.accessGranted[j] == insuranceCompanyAddress) {
 //                     count++;
 //                     break; // Break once the address is found
 //                 }
@@ -273,8 +303,8 @@ contract PatientRecords {
 //         uint index = 0;
 //         for (uint i = 0; i < length; i++) {
 //             Patient memory patient = patients[patientIDs[i]];
-//             for (uint j = 0; j < patient.accessProvided.length; j++) {
-//                 if (patient.accessProvided[j] == insuranceCompanyAddress) {
+//             for (uint j = 0; j < patient.accessGranted.length; j++) {
+//                 if (patient.accessGranted[j] == insuranceCompanyAddress) {
 //                     ids[index] = patientIDs[i];
 //                     patientsList[index] = patient;
 //                     index++;
@@ -286,43 +316,3 @@ contract PatientRecords {
 //         return (ids, patientsList);
 //     }
 
-
-//     function revokeAccess(uint _patientID, uint _addressPatientID) public {
-//         // Get the patient record for the patient revoking access
-//         Patient storage patient = patients[_patientID];
-
-//         // Get the patient record for the patient whose access is being revoked
-//         Patient storage addressPatient = patients[_addressPatientID];
-
-//         // Only the patient can revoke access
-//         require(
-//             msg.sender == patient.patientAddress,
-//             "Unauthorized: Only the patient can revoke access."
-//         );
-
-//         // Check if the addressPatientID exists
-//         require(
-//             addressPatient.patientAddress != address(0),
-//             "Invalid patient ID: Patient to revoke access, does not exist."
-//         );
-
-//         // Find the address in the accessProvided list and remove it
-//         bool addressFound = false;
-//         for (uint i = 0; i < patient.accessProvided.length; i++) {
-//             if (patient.accessProvided[i] == addressPatient.patientAddress) {
-//                 // Remove the address by shifting the last element to the current position and reducing the array size
-//                 patient.accessProvided[i] = patient.accessProvided[patient.accessProvided.length - 1];
-//                 patient.accessProvided.pop();
-//                 addressFound = true;
-//                 break;
-//             }
-//         }
-
-//         // If the address was not found in the list
-//         require(addressFound, "Address not found in the access list.");
-
-//         emit AccessRevoked(_patientID, addressPatient.patientAddress);
-//     }
-
-
-// }

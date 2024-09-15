@@ -136,7 +136,7 @@ const abi = [
         },
         {
           "internalType": "address[][]",
-          "name": "accessProvidedLists",
+          "name": "accessGrantedLists",
           "type": "address[][]"
         }
       ],
@@ -191,13 +191,33 @@ const abi = [
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_patientID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_addressToRevoke",
+          "type": "address"
+        }
+      ],
+      "name": "revokeAccess",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
 ]
 
 // Ensure Web3 is available
 const web3 = new Web3(Web3.givenProvider || "HTTP://127.0.0.1:7545");
+//const web3 = new Web3(Web3.givenProvider || "HTTP://139.59.86.36:8545");
 
-const contractAddress = '0x7F7afdaAC6Bf4F7065fF931EcCB5907d08c70869'; // Replace with your contract address
+
+const contractAddress = '0x7797B2c84D5F447e48E6e6cFf30E31b6bF38Fbd9'; // Replace with your contract address
 
 let PatientRecords; // Define in a broader scope
 let accounts; // Define in a broader scope
@@ -533,7 +553,100 @@ document.addEventListener('DOMContentLoaded', function() {
       console.error('Form element not found.');
   }
 
-}); 
+ 
+
+
+  // Revoke Access
+  const revokeAccessForm = document.getElementById('revokeAccessForm');
+
+  if (revokeAccessForm) {
+      revokeAccessForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+
+          const patientIDElement = document.getElementById('patientID');
+          const addressToRevokeElement = document.getElementById('addressPatientID');
+
+          if (!patientIDElement || !addressToRevokeElement) {
+              alert('Error: Required form elements not found.');
+              return;
+          }
+
+          const patientID = patientIDElement.value;
+          const addressToRevoke = addressToRevokeElement.value;
+          console.log(patientID);
+          console.log(addressToRevoke);
+
+          try {
+              const userAccount = await getUserAccount();
+
+              if (!userAccount) {
+                  alert('Error: No user account found.');
+                  return;
+              }
+
+              // Fetch the patient data from the contract
+              const patient = await PatientRecords.methods.patients(patientID).call();
+              const cid = patient.cid;  // Retrieve CID from the patient data
+              console.log('CID from contract:', cid);
+
+              // Pull the patient data from IPFS using the CID
+              const patientData = await pull(cid);  // `pull` is a function to retrieve data from IPFS
+              console.log('Patient data from IPFS:', patientData);
+
+              // Check if the current user is authorized to revoke access
+              if (userAccount.toLowerCase() !== patientData.patientAddress.toLowerCase()) {
+                  alert('You are not authorized to revoke access for this patient.');
+                  return;
+              }
+
+              // Check if the address to revoke exists in the accessProvided list
+              const accessProvided = patientData.accessProvided || [];
+              console.log(accessProvided)
+              const addressIndex = accessProvided.indexOf(addressToRevoke.toLowerCase());
+              console.log(addressIndex)
+
+              // if (addressIndex === -1) {
+              //     alert(`The address ${addressToRevoke} does not have access.`);
+              //     return;
+              // }
+
+              // Estimate gas for the revokeAccess function
+              const gasEstimate = await PatientRecords.methods.revokeAccess(patientID, addressToRevoke).estimateGas({ from: userAccount });
+
+              // Call revokeAccess on the smart contract
+              const receipt = await PatientRecords.methods.revokeAccess(patientID, addressToRevoke).send({ from: userAccount, gas: gasEstimate });
+
+              console.log('Transaction receipt:', receipt);
+
+              if (receipt.status) {
+                  // Fetch the updated patient data from the smart contract or IPFS
+                  const updatedPatientData = await pull(cid);  // Optionally fetch new data after update
+                  console.log('Updated Patient data from IPFS:', updatedPatientData);
+
+                  alert('Access revoked successfully.');
+              } else {
+                  throw new Error("Transaction failed");
+              }
+
+          } catch (error) {
+              console.error('Error', error);
+
+              if (error.message.includes("Unauthorized")) {
+                  alert('You are not authorized to revoke access.');
+              } else if (error.message.includes("Invalid patient ID")) {
+                  alert(error.message);
+              } else if (error.message.includes("Address not found in the access list")) {
+                  alert('The address does not have access.');
+              } else {
+                  alert(`Invalid Request`);
+              }
+          }
+      });
+  } else {
+      console.error('Form element not found.');
+  }
+
+});
 
 
 //     // Update Insurance Company 
@@ -592,72 +705,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
-//     // Revoke Access
-//     const revokeAccessForm = document.getElementById('revokeAccessForm');
-
-//     if (revokeAccessForm) {
-//         revokeAccessForm.addEventListener('submit', async (event) => {
-//             event.preventDefault();
-
-//             const patientIDElement = document.getElementById('patientID');
-//             const addressPatientIDElement = document.getElementById('addressPatientID');
-
-//             if (!patientIDElement || !addressPatientIDElement) {
-//                 alert('Error: Required form elements not found.');
-//                 return;
-//             }
-
-//             const patientID = patientIDElement.value;
-//             console.log(patientID)
-//             const addressPatientID = addressPatientIDElement.value;
-//             console.log(addressPatientID)
-
-//             try {
-//                 const userAccount = await getUserAccount();
-
-//                 if (!userAccount) {
-//                     alert('Error: No user account found.');
-//                     return;
-//                 }
-
-//                 // Fetch the patient data of the current user
-//                 const patient = await PatientRecords.methods.patients(patientID).call();
-//                 console.log(patient)
-
-//                 if (userAccount.toLowerCase() !== patient.patientAddress.toLowerCase()) {
-//                     alert('You are not authorized to revoke access for this patient.');
-//                     return;
-//                 }
-
-//                 // Fetch the patient data of the address to revoke access from
-//                 const addressPatient = await PatientRecords.methods.patients(addressPatientID).call();
-//                 console.log(addressPatient)
-//                 console.log(patient.accessProvided)
-                
-//                 // Estimate gas for the revokeAccess function
-//                 const gasEstimate = await PatientRecords.methods.revokeAccess(patientID, addressPatientID).estimateGas({ from: userAccount });
-
-//                 // Call revokeAccess on the smart contract
-//                 await PatientRecords.methods.revokeAccess(patientID, addressPatientID).send({ from: userAccount, gas: gasEstimate });
-
-//                 alert('Access revoked successfully.');
-                
-//             } catch (error) {
-//                 console.error('Error', error);
-
-//                 if (error.message.includes("Unauthorized")) {
-//                     alert('You are not authorized to revoke access.');
-//                 } else if (error.message.includes("Invalid patient ID")) {
-//                     alert(error.message);
-//                 } else if (error.message.includes("Address not found in the access list")) {
-//                     alert('The address does not have access.');
-//                 } else {
-//                     alert(`Invalid Request`);
-//                 }
-//             }
-//         });
-//     } else {
-//         console.error('Form element not found.');
-//     }
-// });
