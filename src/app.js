@@ -276,7 +276,7 @@ const web3 = new Web3(Web3.givenProvider || "HTTP://127.0.0.1:7545");
 //const web3 = new Web3(Web3.givenProvider || "HTTP://139.59.86.36:8545");
 
 
-const contractAddress = '0xA0e8A8c85E6f3F7461dc16c39266bE8e13081Fa8'; // Replace with your contract address
+const contractAddress = '0x3235C381FBB80c146CdC5ACc9300FB0615fA7B1A'; // Replace with your contract address
 
 let PatientRecords; // Define in a broader scope
 let accounts; // Define in a broader scope
