@@ -1,3 +1,4 @@
 node_modules
 .env
 build
+src_ipfs_pinata/.env
