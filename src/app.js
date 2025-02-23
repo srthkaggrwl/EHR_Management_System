@@ -273,10 +273,9 @@ const abi = [
 
 // Ensure Web3 is available
 const web3 = new Web3(Web3.givenProvider || "HTTP://127.0.0.1:7545");
-//const web3 = new Web3(Web3.givenProvider || "HTTP://139.59.86.36:8545");
 
 
-const contractAddress = '0xB15d02456d9699076BC15B8C6c0fcC06F9974Dc0'; // Replace with your contract address
+const contractAddress = ''; // Replace with your contract address
 
 let PatientRecords; // Define in a broader scope
 let accounts; // Define in a broader scope
@@ -328,7 +327,7 @@ async function pushJson(data) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiIzZWFkNzJlZC1jNDI1LTQ0YjUtYjEzZi03MTliZTBkMmQ5NTAiLCJlbWFpbCI6InNhcnRoYWthZ2dhcndhbDEyMEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiMDhiNGE1ZTlkYTA3ZjI1ZDFiY2UiLCJzY29wZWRLZXlTZWNyZXQiOiI1ZGI2MjMyNTIxOGFkMmU0NDlkZjFjMTZlMDk5Y2ZjODQ2ODFiNjVjYWUzMGYyNmE0NjcyMjU5YTdmZWZjOGYxIiwiZXhwIjoxNzU3NzQ2MjE4fQ.0TIJrjd4cFdYPoFV0B4plKfvsEuRDTasWeahCQMHBsQ`
+      Authorization: `Bearer ` // Add Bearer key
     },
     body: JSON.stringify(data)
   };
