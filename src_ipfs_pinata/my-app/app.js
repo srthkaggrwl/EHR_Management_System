@@ -7,7 +7,7 @@ async function pushJson(data) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer {$key}` // replace the bearer key
+      Authorization: `Bearer` // Add Bearer key
     },
     body: JSON.stringify(data)
   };
@@ -20,6 +20,7 @@ async function pushJson(data) {
     console.log(error);
   }
 }
+
 
 
 async function pull(cid_ipfs) {
@@ -39,7 +40,4 @@ async function pull(cid_ipfs) {
     console.log("Error:", error);
   }
 }
-
-
-
 

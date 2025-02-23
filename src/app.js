@@ -273,6 +273,7 @@ const abi = [
 
 // Ensure Web3 is available
 const web3 = new Web3(Web3.givenProvider || "HTTP://127.0.0.1:7545");
+//const web3 = new Web3(Web3.givenProvider || "HTTP://139.59.86.36:8545");
 
 
 const contractAddress = ''; // Replace with your contract address
